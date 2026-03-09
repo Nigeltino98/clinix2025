@@ -1,0 +1,14 @@
+/* EditInventory.css (or your preferred CSS file) */
+.heading-container {
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.heading-text {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+}

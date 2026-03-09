@@ -1,0 +1,43 @@
+/* Add this CSS to your component's stylesheet or in a separate .css file */
+.table-container {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #ccc;
+
+}
+
+.table-row {
+
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #ccc; /* Add a border between rows */
+}
+
+/* Style the last row without a bottom border */
+.table-row:last-child {
+  border-bottom: none;
+}
+
+/* Style the headings */
+.table-heading {
+
+  background-color: #5cb85c; /* green color for headings */
+  color: white;
+  font-weight: bold;
+  padding: 14px;
+}
+
+/* Alternate row background color */
+.table-row:nth-child(even) {
+  background-color: #f5f5f5; /* Light gray background for even rows */
+}
+
+/* Apply styles to rows and cells */
+.table-row {
+  /* Other styles from the previous section */
+}
+
+.table-cell {
+  padding: 10px;
+}

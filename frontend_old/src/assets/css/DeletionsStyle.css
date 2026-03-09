@@ -1,0 +1,6 @@
+.deleted-appointment {
+
+  text-decoration: line-through;
+  color: #ff0000;
+  /* Add more styles as needed */
+}

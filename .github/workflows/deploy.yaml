@@ -1,0 +1,73 @@
+name: 'main'
+on:
+  push:
+    branches: [main]
+    paths:
+      - '*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build Docker image
+        run: docker compose -f docker-compose.dev.yml build
+
+      - name: Save Backend Docker image as tar file
+        run: docker save -o backend.tar seacole-software-backend:latest
+
+      - name: Save Frontend Docker image as tar file
+        run: docker save -o frontend.tar seacole-software-frontend:latest
+
+      - name: Set up SSH key
+        run: |
+          env
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p 22 ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          sudo apt-get install sshpass
+
+      - name: Transfer Docker images to remote server
+        env:
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+        run: |
+          sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no frontend.tar ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}
+          sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no backend.tar ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}
+
+      - name: Load Docker images on remote server
+        env:
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+        run: |
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'ENDSSH'
+          docker load -i ${{ secrets.WORK_DIR }}/frontend.tar
+          docker load -i ${{ secrets.WORK_DIR }}/backend.tar
+          ENDSSH
+
+
+      - name: Transfer Docker Compose file to remote server
+        env:
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+        run: |
+          sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no docker-compose.dev.yml ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}
+
+      - name: Remove running Docker containers
+        env:
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+        run: |
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'ENDSSH'
+          docker rm -f backend frontend
+          ENDSSH
+
+
+      - name: Deploy Docker containers using Docker Compose on remote server
+        env:
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+        run: |
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'ENDSSH'
+          docker run -d -p 3000:3000 --restart=always --name frontend seacole-software-frontend:latest
+          docker run -d -p 8000:8000 --restart=always --name backend seacole-software-backend:latest
+          ENDSSH

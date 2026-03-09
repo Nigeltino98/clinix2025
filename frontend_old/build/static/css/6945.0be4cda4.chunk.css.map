@@ -1,0 +1,1 @@
+{"version":3,"file":"static/css/6945.0be4cda4.chunk.css","mappings":"AAAA,qBAGE,SAAc,CADd,4BAGF","sources":["assets/css/DeletionsStyle.css"],"sourcesContent":[".deleted-appointment {\n\n  text-decoration: line-through;\n  color: #ff0000;\n  /* Add more styles as needed */\n}\n"],"names":[],"sourceRoot":""}

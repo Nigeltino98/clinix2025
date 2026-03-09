@@ -1,0 +1,134 @@
+/* CustomModal.css */
+.custom-modal {
+    font-family: 'Arial, sans-serif';
+    border-radius: 10px;
+    overflow: scroll;
+    box-shadow: 0 5px 15px rgba(100, 0, 0, 0.3);
+}
+
+.custom-modal-header {
+    background-color: red;
+    color: whitesmoke;
+    display: table-column;
+
+    align-items: normal;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.custom-modal-header .modal-title-main {
+    font-size: 28px;
+    margin: 0;
+}
+
+.custom-modal-header .modal-title-sub {
+    font-size: 18px;
+    margin: 0;
+}
+
+.custom-modal-header .modal-date {
+    font-size: 20px;
+    margin-top: 5px;
+}
+
+.custom-close-button {
+    background: orangered;
+    font-size: 22px;
+    color: white ;
+    cursor: pointer;
+    border-color: orangered;
+}
+
+.custom-modal-body {
+    padding: 30px;
+    background-color: #f8f9fa;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.custom-modal-body .modal-subtitle {
+    font-size: 22px;
+    margin-bottom: 15px;
+}
+
+.custom-modal-body p {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.custom-modal-body p strong {
+    font-weight: bold;
+}
+
+
+
+.plan-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.plan-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.plan-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.plan-table tr:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+.plan-table tr:hover {
+    background-color: #ddd;
+}
+
+.ms-modal-header-radius-0 {
+    border-radius: 0;
+    background-color: springgreen;
+    color: white;
+    padding: 25px;
+}
+
+.ms-modal-dialog-width {
+    max-width: 800px;
+}
+
+.ms-modal-content-width {
+    width: 100%;
+}
+
+.close {
+    background: black;
+    border: none;
+    font-size: 1.5rem;
+    color: red;
+}
+
+.custom-print-button {
+    background-color: #3085d6;
+    color: red;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 10px;
+    margin-left: 10px; /* Adjust the margin as needed */
+}
+
+.custom-print-button:hover {
+    background-color: #256bb0;
+}
+
+.custom-print-button:active {
+    background-color: #1f5a94;
+}
+
+.custom-print-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(48, 133, 214, 0.5);
+}
+
+

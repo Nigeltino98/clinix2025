@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkexpress=self.webpackChunkexpress||[]).push([[2186],{52186:(e,s,r)=>{r.r(s),r.d(s,{default:()=>t});r(65043);var n=r(79722),o=r(70579);const t=()=>(0,o.jsx)("button",{onClick:()=>{n.A.post("/api/delete-non-superusers/").then(e=>{console.log(e.data.message)}).catch(e=>{console.error(e)})},children:"Delete Non-Superusers"})}}]);
+//# sourceMappingURL=2186.81549e6f.chunk.js.map

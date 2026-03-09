@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <br>
+
+        <h2>Thank you for joining us, {{ user.name }} {{ user.name }}</h2>
+        <h3>Your profile will not be active until you complete this confirmation step.
+
+
+            To activate the account, click on the button below.</h3>
+
+
+        <h3>Shipping Details:</h3>
+
+        {{ order.full_name }} </br>
+        {{ order.shipping_address.street }} <br/>
+        {{ order.shipping_address.city }} <br/>
+        {{ order.shipping_address.postcode }}
+
+        <h3>
+            
+        </h3>
+        Email: {{ order.email }} <br/>
+        Phone: {{ order.phone }}
+
+        <h2>Order Details:</h2>
+
+
+    </body>
+</html>
