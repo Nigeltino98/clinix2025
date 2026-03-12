@@ -16,6 +16,8 @@ RUN apt-get update --fix-missing && \
 COPY ./requirements.txt /requirements.txt
 RUN pip install --no-cache-dir -r /requirements.txt
 
+# Collect static files
+RUN python manage.py collectstatic --noinput
 # Set up directory structure
 WORKDIR /usr/src/app
 COPY . /usr/src/app

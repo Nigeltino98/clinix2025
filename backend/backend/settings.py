@@ -33,7 +33,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 # settings.py
 
-DEBUG = True
+DEBUG = False
 
 
 ALLOWED_HOSTS = [
@@ -271,8 +271,8 @@ BACKEND_HOST = os.environ.get("BACKEND_HOST", default="http://localhost:8000")
 
 HOST_SCHEME = "http://"
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = False
-SESSION_COOKIE_SECURE = False
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_HSTS_SECONDS = None
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
