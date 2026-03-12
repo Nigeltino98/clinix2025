@@ -767,7 +767,7 @@ class Appointment(models.Model):
     )
     is_deleted = models.BooleanField(default=False)
     deletion_reason = models.TextField(null=True, blank=True, default="Not deleted")
-    notify_email = models.EmailField(null=True, blank=True)
+    notify_email = models.EmailField(null=True, blank=True, default="")
 
     class Meta:
         ordering = ["-created_on"]
