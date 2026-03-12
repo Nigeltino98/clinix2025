@@ -17,6 +17,10 @@ import environ
 from dotenv import load_dotenv
 load_dotenv()
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR.parent / ".env")
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("SECRET_KEY")
 env = environ.Env()
