@@ -48,7 +48,6 @@ media
 *.bak 
 *.save
 *.tar.gz
-*.json
 *media_backup_*.tar.gz
 
 import Config from './components/Config'

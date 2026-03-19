@@ -3,7 +3,7 @@ import { toastdanger, } from '../components/utils/notifications'
 import { toastloading, } from '../components/utils/notifications'
 
 
-const baseURl = process.env.REACT_APP_BACKEND_HOST || "http://127.0.0.1:8000";
+const baseURl = process.env.REACT_APP_BACKEND_HOST || "";
 
 console.log("Using backend host:", baseURl);
 
@@ -40,29 +40,21 @@ const errorHandler = (error, ...args) => {
         toastdanger("Page not found")
     }
 }
+// ---------------- GET TOKEN / LOGIN ----------------
 export const getToken = (handler, url, body) => {
     console.log("Sending login request to:", `${baseURl}${url}`);
     console.log("With body:", body);
-    axios.post(
-        `${baseURl}${url}`,
-        body,
-    ).then((response) => {
-        handler(response)
-    }).catch((error) => {
-        errorHandler(error)
-    })
+    axios.post(`${baseURl}${url}`, body)
+        .then(response => handler(response))
+        .catch(error => errorHandler(error));
 }
 
+// ---------------- GET REQUESTS ----------------
 export const getApi = (handleSet, token, url, ...args) => {
-    axios({
-        method: 'get',
-        url: `${baseURl}${url}`,
-        headers: { Authorization: ` Token ${token}` },
-    }).then((response) => {
-        handleSet(response)
-    }).catch((error) => {
-        errorHandler(error, ...args)
-    })
+    axios.get(`${baseURl}${url}`, {
+        headers: { Authorization: `Token ${token}` },
+    }).then(response => handleSet(response))
+      .catch(error => errorHandler(error, ...args));
 }
 
 export const postApi = (handler, token, url, body, ...args) => {

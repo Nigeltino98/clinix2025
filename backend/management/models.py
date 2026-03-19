@@ -490,7 +490,7 @@ class Resident(models.Model):
     allergies = models.TextField(blank=True, null=True)
     risk = models.CharField(max_length=9999,blank=True, null=True)
     date_of_admission = models.DateField(blank=True, null=True)
-    ethnic_origin = models.CharField(default= 'Unknown', max_length=30)
+    ethnic_origin = models.CharField(default= 'Unknown', max_length=30, null=True, blank=True)
     marital_status = models.CharField(default='NonApplicable', max_length=100)
 
 
