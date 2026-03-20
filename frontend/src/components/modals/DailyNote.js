@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, InputGroup, Button, Col } from 'react-bootstrap';
+import { Form, InputGroup, Button, Col, Row } from 'react-bootstrap';
 import { postApi } from '../../api/api';
 import { useSelector } from 'react-redux';
 import { toastsuccess } from '../utils/notifications';
@@ -75,7 +75,10 @@ const AddDailyNote = (props) => {
       <div className="ms-panel ms-panel-bshadow-none">
         <div className="ms-panel-body">
           <Form noValidate validated={validated} onSubmit={handleSubmit}>
-            <Form.Row>
+
+            {/* ✅ FIXED: replaced Form.Row with Row */}
+            <Row>
+
               <Form.Group as={Col} md="6" className="mb-3">
                 <Form.Label>Subject</Form.Label>
                 {errors.subject &&
@@ -157,7 +160,8 @@ const AddDailyNote = (props) => {
                   </Form.Control>
                 </InputGroup>
               </Form.Group>
-            </Form.Row>
+
+            </Row>
 
             <Button type="submit" className="mt-4 d-inline w-20 me-2">
               Save
