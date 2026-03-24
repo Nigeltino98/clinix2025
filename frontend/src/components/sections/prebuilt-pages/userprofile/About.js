@@ -90,32 +90,67 @@ const About = () => {
     ];
 
     const columns = [
-        {
-            name: "Name", cell: row =>
-                <div >
-                    {row.first_name} {row.last_name}
-                </div>, sortable: true
-        },
-        { name: "Phone", selector: "phone", sortable: true },
-        { name: "Email", selector: "email", sortable: true },
-        { name: "Address", selector: "address", sortable: true },
-        { name: "Title", selector: "title", sortable: true },
-        { name: "Contact type", selector: "type", sortable: true },
-        {
-            name: "Action", cell: row =>
-                <div data-tag="allowRowEvents" >
-                    <ProtectedRoute perm="add_family">
-                        <Link to='#' onClick={() => handleShowEdit(row.national_id)}>
-                            <i className='fas fa-pencil-alt ms-text-info  mr-4' />
-                        </Link>
-                    </ProtectedRoute>
-                    <ProtectedRoute perm="delete_family">
-                        <Link to='#' onClick={() => { handleDelete(row.national_id) }}>
-                            <i className='far fa-trash-alt ms-text-danger  mr-4' />
-                        </Link>
-                    </ProtectedRoute>
-                </div>, sortable: true
-        },
+     {
+       name: "Name",
+       cell: row => (
+         <div>
+           {row.first_name} {row.last_name}
+         </div>
+       ),
+       sortable: true
+     },
+
+     {
+       name: "Phone",
+       selector: row => row.phone,
+       sortable: true
+     },
+
+     {
+       name: "Email",
+       selector: row => row.email,
+       sortable: true
+     },
+
+     {
+       name: "Address",
+       selector: row => row.address,
+       sortable: true
+     },
+
+     {
+       name: "Title",
+       selector: row => row.title,
+       sortable: true
+     },
+
+     {
+       name: "Contact type",
+       selector: row => row.type,
+       sortable: true
+     },
+
+     {
+       name: "Action",
+       cell: row => (
+         <div data-tag="allowRowEvents">
+
+           <ProtectedRoute perm="add_family">
+             <Link to="#" onClick={() => handleShowEdit(row.national_id)}>
+               <i className="fas fa-pencil-alt ms-text-info mr-4" />
+             </Link>
+           </ProtectedRoute>
+
+           <ProtectedRoute perm="delete_family">
+             <Link to="#" onClick={() => handleDelete(row.national_id)}>
+               <i className="far fa-trash-alt ms-text-danger mr-4" />
+             </Link>
+           </ProtectedRoute>
+
+         </div>
+       ),
+       sortable: true
+     }
     ];
 
     useEffect(() => {
