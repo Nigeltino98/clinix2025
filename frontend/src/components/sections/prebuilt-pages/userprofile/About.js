@@ -91,13 +91,9 @@ const About = () => {
 
     const columns = [
      {
-       name: "Name",
-       cell: row => (
-         <div>
-           {row.first_name} {row.last_name}
-         </div>
-       ),
-       sortable: true
+      name: "Name",
+      selector: row => `${row.first_name} ${row.last_name}`,
+      sortable: true
      },
 
      {
@@ -149,7 +145,7 @@ const About = () => {
 
          </div>
        ),
-       sortable: true
+       sortable: false
      }
     ];
 

@@ -40,21 +40,41 @@ const Addform = () => {
         setState(initialState)
     }
     const handleSubmit = (event) => {
+
         setValidated(true);
         const form = event.currentTarget;
+
         event.preventDefault();
+
         if (form.checkValidity() === false) {
             event.stopPropagation();
-        } else {
-            postApi(_ => {
+            return;
+        }
+
+        const payload = {
+            ...state,
+
+            // inject automatically
+            resident_id: selected_resident?.id || state.resident,
+
+            // optional: remove incorrect field
+            resident: undefined
+        }
+
+        postApi(
+            _ => {
                 toastsuccess("Suggestion added successfully")
                 handleReset()
             },
-                token, `/api/suggestion/`, state, errors_list => { setErrors(errors_list) })
-        }
+            token,
+            `/api/suggestion/`,
+            payload,
+            errors_list => { setErrors(errors_list) }
+        )
+    }
 
 
-    };
+
 
     const handleChange = (event) => {
         switch (event.target.name) {
@@ -152,6 +172,15 @@ const Addform = () => {
             staff: user.id,
         }))
     }, [user])
+
+    useEffect(() => {
+        if (selected_resident) {
+            setState(prevState => ({
+                ...prevState,
+                resident: selected_resident.national_id
+            }))
+        }
+    }, [selected_resident])
 
     useEffect(() => {
         getApi(response => { dispatch(familyAction.setFamily(response.data)) }, token, "/api/family")
