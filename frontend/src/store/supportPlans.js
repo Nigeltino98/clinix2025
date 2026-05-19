@@ -19,6 +19,20 @@ const planSlice = createSlice({
                 plan.evaluations.push(evaluation);
             }
         },
+
+       updatePlan(state, action) {
+            const updated = action.payload;
+
+            const index = state.planList.findIndex(p => p.id === updated.id);
+
+            if (index !== -1) {
+                state.planList[index] = updated;
+            }
+
+            if (state.selectedPlan?.id === updated.id) {
+                state.selectedPlan = updated;
+            }
+        },
     }
 })
 export const planActions = planSlice.actions

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Form, InputGroup, Button, Col, Row } from 'react-bootstrap';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import Swal from 'sweetalert2';
+import {planActions} from "../../store/supportPlans";
 
 //import { ToastContainer } from 'react-toastify';
 //import { toast } from 'react-toastify';
@@ -10,7 +11,7 @@ import Swal from 'sweetalert2';
 const EditQuestion = (props) => {
     const token = useSelector((state) => state.auth.token)?.token;
     const residents = useSelector((state) => state.resident.residentList) || [];
-
+    const dispatch = useDispatch();
     const [formData, setFormData] = useState(props.plan || {});
     const [validated, setValidated] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
@@ -77,6 +78,8 @@ const EditQuestion = (props) => {
 
             const data = await response.json();
             console.log('Plan updated:', data);
+
+            dispatch(planActions.updatePlan(data));
 
             Swal.fire({
                 icon:'success',

@@ -33,6 +33,7 @@ const Addform = () => {
     const [selectedPlan, setSelectedPlan] = useState(null);
     const user = useSelector((state) => state.auth.user);
     const [selectedEvaluations, setSelectedEvaluations] = useState([]);
+    const [statusFilter, setStatusFilter] = useState("ALL");
     const BASE_BACKEND_URL = "http://127.0.0.1:8000";
 
     //const contentRef = useRef();
@@ -181,6 +182,23 @@ const Addform = () => {
     };
 
     const columns = [
+
+        {
+            name: <div title="Evaluation Status">Status</div>,
+            cell: row => {
+              const color = getEvaluationColor(row.next_assement_date);
+
+              return (
+                <span>
+                  {color === 'red' && "🔴 "}
+                  {color === 'blue' && "🔵 "}
+                  {color === 'green' && "🟢 "}
+                </span>
+              );
+            },
+            sortable: true,
+            width: "140px"
+          },
         {
             name: 'Evaluations', cell: row =>
                 <ProtectedRoute perm="view_planevaluation">
@@ -193,15 +211,20 @@ const Addform = () => {
                     </ProtectedRoute>
         },
         {
-            name: "Title", selector: row => row.title, sortable: true
+          name: "Title",
+          cell: row => (
+            <div title={row.title}>
+              {row.title.length > 40 ? row.title.slice(0, 40) + "..." : row.title}
+            </div>
+          ),
         },
-        { name: "Category", selector: row => row.category, sortable: true },
+       // { name: "Category", selector: row => row.category, sortable: true },
         //{ name: "Action Plan", selector: "action_plan", sortable: true },
-        { name: "Approved By", selector: row => row.approved_by, sortable: true},
+        //{ name: "Approved By", selector: row => row.approved_by, sortable: true},
 
         //{ name: "CP Duration", selector: "cp_duration", sortable: true},
-        { name: "Care Rating", selector: row => row.care_rating, sortable: true},
-        {
+        //{ name: "Care Rating", selector: row => row.care_rating, sortable: true},
+        /*{
                 name: "Attachment",
                 cell: row =>
                 row.attachment ? (
@@ -216,7 +239,7 @@ const Addform = () => {
                     "No File"
                 ),
             sortable: true
-        },
+        }*/
         //{ name: "By Who", selector: "by_who", sortable: true },
         //{ name: "By When", selector: "by_when", sortable: true },
         //{ name: "Goal", selector: "goal", sortable: true },
@@ -239,15 +262,16 @@ const Addform = () => {
                     {dateToYMD(row.created_on)}
                 </div>, sortable: true
         },
-        {
+        /*{
             name: "Last Reviewed", cell: row =>
                 <div>
                     {dateToYMD(row.last_evaluated_date)}
                 </div>, sortable: true
-        },
+        },*/
 
         {
-            name: "Date of Next Evaluation", cell: row =>
+            name: <div title="Date of Next Evaluation">Next Eval</div>,
+            cell: row =>
                 <div style={{ color: getEvaluationColor(row.next_assement_date) }}>
                     {dateToYMD(row.next_assement_date)}
                 </div>, sortable: true
@@ -403,7 +427,19 @@ const Addform = () => {
     };
 
     // Filter plans based on 'deletion' status
-    const filteredPlans = display_plans.filter((item) => item.is_deleted !== true);
+    const filteredPlans = display_plans
+      .filter(item => item.is_deleted !== true)
+      .filter(plan => {
+        if (statusFilter === "ALL") return true;
+
+        const status = getEvaluationColor(plan.next_assement_date);
+
+        if (statusFilter === "OVERDUE") return status === "red";
+        if (statusFilter === "TODAY") return status === "blue";
+        if (statusFilter === "UPCOMING") return status === "green";
+
+        return true;
+      });
 
     const tableData = {
         columns,
@@ -421,7 +457,7 @@ const Addform = () => {
             }, token, `/api/support-plan/${selectedPlan.id}/evaluations`);
         }
 
-    }, [dispatch, token, showDelete, selectedPlan]);
+    }, [dispatch, token, showDelete]);
 
     useEffect(() => {
         if (JSON.stringify(selected_resident) === '{}') {
@@ -611,6 +647,35 @@ const Addform = () => {
                 </ProtectedRoute>
             </div>
             <div className="ms-panel-body">
+                <div className="mb-3 d-flex gap-2 flex-wrap">
+                  <button
+                    onClick={() => setStatusFilter("ALL")}
+                    className={`btn ${statusFilter === "ALL" ? "btn-light" : "btn-outline-dark"}`}
+                  >
+                    All
+                  </button>
+
+                  <button
+                    onClick={() => setStatusFilter("OVERDUE")}
+                    className={`btn ${statusFilter === "OVERDUE" ? "btn-danger" : "btn-outline-danger"}`}
+                  >
+                    🔴 Overdue
+                  </button>
+
+                  <button
+                    onClick={() => setStatusFilter("TODAY")}
+                    className={`btn ${statusFilter === "TODAY" ? "btn-primary" : "btn-outline-primary"}`}
+                  >
+                    🔵 Today
+                  </button>
+
+                  <button
+                    onClick={() => setStatusFilter("UPCOMING")}
+                    className={`btn ${statusFilter === "UPCOMING" ? "btn-success" : "btn-outline-success"}`}
+                  >
+                    🟢 Upcoming
+                  </button>
+                </div>
                 <div className="thead-primary datatables">
                     <DataTableExtensions {...tableData} print={false} export={false}>
                         <DataTable
@@ -620,6 +685,8 @@ const Addform = () => {
                             responsive={true}
                             striped
                             noHeader
+                            highlightOnHover
+                            pointerOnHover
                             //onRowClicked={handleRowClick}
                         />
                     </DataTableExtensions>

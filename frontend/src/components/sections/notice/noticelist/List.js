@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
+import { FaExclamationCircle, FaClock, FaCheckCircle } from "react-icons/fa";
+import { Nav } from "react-bootstrap";
 //import DataTableExtensions from 'react-data-table-component-extensions';
 import { useDispatch, useSelector } from 'react-redux';
 import { getApi, deleteApi } from '../../../../api/api';
@@ -29,6 +31,34 @@ const SuggestionList = () => {
   const token = useSelector((state) => state.auth.token)?.token || "";
   const residents = useSelector(state => state.resident.residentList) || [];
   const homes = useSelector(state => state.home.homeList) || [];
+  const [filterStatus, setFilterStatus] = useState("ALL");
+
+  const getReviewStatus = (dateString) => {
+    if (!dateString) return "UNKNOWN";
+
+    const today = new Date();
+    const reviewDate = new Date(dateString);
+
+    today.setHours(0, 0, 0, 0);
+    reviewDate.setHours(0, 0, 0, 0);
+
+    if (reviewDate < today) return "PAST";
+    if (reviewDate.getTime() === today.getTime()) return "TODAY";
+    return "UPCOMING";
+  };
+
+  const renderStatusIcon = (status) => {
+    switch (status) {
+      case "PAST":
+        return <FaExclamationCircle color="red" title="Overdue" />;
+      case "TODAY":
+        return <FaClock color="orange" title="Due Today" />;
+      case "UPCOMING":
+        return <FaCheckCircle color="green" title="Upcoming" />;
+      default:
+        return null;
+    }
+  };
 
   // Fetch suggestions
   useEffect(() => {
@@ -91,15 +121,37 @@ const SuggestionList = () => {
     : suggestions.map((s) => s.resident);
 
   // Apply the filters to suggestions for the table
-  const filteredSuggestions = suggestions.filter((incident) => {
-    if (!selectedHome) return true;
+  const filteredSuggestions = suggestions
+    .filter((item) => {
+      // 🔹 HOME FILTER ONLY
+      if (selectedHome) {
+        return item.resident?.home?.id?.toString() === selectedHome.toString();
+      }
+      return true;
+    })
+    .filter((item) => {
+      // 🔹 STATUS FILTER
+      const status = getReviewStatus(item.next_assement_date);
 
-    return incident.resident?.home?.id?.toString() === selectedHome.toString();
-  });
+      if (filterStatus === "PAST") return status === "PAST";
+      if (filterStatus === "TODAY") return status === "TODAY";
+      if (filterStatus === "UPCOMING") return status === "UPCOMING";
+
+      return true; // ALL
+    });
 
   const handleRowClick = (row) => setSelectedSuggestion(row.id);
 
   const columns = [
+
+  {
+    name: "",
+    cell: row => {
+      const status = getReviewStatus(row.next_assement_date);
+      return <div>{renderStatusIcon(status)}</div>;
+    },
+    width: "60px"
+  },
   {
     name: "Created On",
     cell: row => <div>{dateToYMD(row.created_on)}</div>,
@@ -233,13 +285,37 @@ const SuggestionList = () => {
           </div>
         </div>
 
+        <div className="mb-3">
+          <Nav variant="tabs" activeKey={filterStatus}>
+            <Nav.Item>
+              <Nav.Link eventKey="ALL" onClick={() => setFilterStatus("ALL")}>
+                All
+              </Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link eventKey="PAST" onClick={() => setFilterStatus("PAST")}>
+                Overdue
+              </Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link eventKey="TODAY" onClick={() => setFilterStatus("TODAY")}>
+                Today
+              </Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link eventKey="UPCOMING" onClick={() => setFilterStatus("UPCOMING")}>
+                Upcoming
+              </Nav.Link>
+            </Nav.Item>
+          </Nav>
+        </div>
 
         <div className="thead-primary datatables">
 
             <DataTable
               pagination
               columns={columns}
-              data={suggestions}
+              data={filteredSuggestions}
               responsive
               striped
               noHeader

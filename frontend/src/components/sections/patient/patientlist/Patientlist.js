@@ -196,15 +196,8 @@ console.log({
           to="/resident/detail"
           onClick={() => handleSelect(row.national_id)}
         >
-          <img
-            src={row.profile_pic}
-            style={{
-              width: '30px',
-              borderRadius: '50%',
-              marginRight: '5px'
-            }}
-            alt="img"
-          />
+
+
           {row.first_name} {row.last_name}
         </Link>
       </div>

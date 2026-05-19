@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, InputGroup, Button, Col } from 'react-bootstrap';
+import { Form, InputGroup, Button, Col, Row} from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux'
 import { suggestionActions } from '../../store/suggestion'
 import { putApi } from '../../api/api'
@@ -126,7 +126,7 @@ const SuggestionEdit = (props) => {
                 </div>
                 <div className="ms-panel-body">
                     <Form noValidate validated={validated} onSubmit={handleSubmit}>
-                        <Form.Row>
+                        <Row>
                             <Form.Group as={Col} md="6" className="mb-3" controlId="validationCustom07">
                                 <Form.Label>Type</Form.Label>
                                 {errors.report_type && errors.report_type.map(err => { return (<p key={err} className='ms-text-danger'>{err}</p>) })}
@@ -284,7 +284,7 @@ const SuggestionEdit = (props) => {
                                     </Form.Control>
                                 </InputGroup>
                             </Form.Group>
-                        </Form.Row>
+                        </Row>
                         <Button type="submit" className="mt-4 d-inline w-20">Save</Button>
                     </Form>
                 </div>
