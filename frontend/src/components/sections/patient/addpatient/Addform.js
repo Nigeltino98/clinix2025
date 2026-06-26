@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Modal, Form, InputGroup, Col, Row, Button } from 'react-bootstrap';
-import { useSelector } from 'react-redux'
+import { residentActions } from '../../../../store/resident'
+import { useDispatch, useSelector } from 'react-redux'
 import { postApi } from '../../../../api/api'
 import { toastsuccess } from '../../../utils/notifications'
 import { min_date, max_date } from '../../../utils/dob'
@@ -46,6 +47,7 @@ const initialState = {
 }
 const Addform = () => {
 
+    const dispatch = useDispatch()
     const [validated, setValidated] = useState(false);
     const [errors, setErrors] = useState(false);
     const [state, setState] = useState(initialState)
@@ -107,10 +109,17 @@ const Addform = () => {
         if (form.checkValidity() === false) {
             event.stopPropagation();
         } else {
-            postApi(_ => {
+            postApi(response => {
+                console.log("CREATED RESIDENT:", response.data);
+                dispatch(
+                    residentActions.addResident(response.data)
+                );
+                console.log("Redux after add:", response.data);
                 toastsuccess("Resident added successfully");
                 handleReset();
-            }, token, `/api/resident/`, formData, errors_list => { setErrors(errors_list) })
+            }, token, `/api/resident/`, formData, errors_list => {
+                setErrors(errors_list)
+            });
         }
 
 

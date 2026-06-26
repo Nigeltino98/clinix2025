@@ -26,12 +26,7 @@ const Patientlist = () => {
     const homes = useSelector((state) => state.home.homeList)
     const selected_home = useSelector((state) => state.home.selectedHome)
     const residents = useSelector(state => state.resident.residentList || []);
-    const [residents_to_display, setResidents] = useState([]);
     const residentDischarges = useSelector((state) => state.resident.residentDischargeList);
- 
-    
-    
-    const [residentList, setResidentList] = useState([]);
     const [dischargedResidents, setDischargedResidents] = useState([]);
 
   
@@ -63,7 +58,7 @@ console.log({
         const selected = Residents.find(item => item.national_id === national_id);
         
         setDischargedResidents([...dischargedResidents, selected]);
-        setResidents(prevResidents => prevResidents.filter(resident => resident.national_id !== national_id));
+        //setResidents(prevResidents => prevResidents.filter(resident => resident.national_id !== national_id));
         dispatch(residentActions.dischargedResident(national_id));
     }
 
@@ -116,8 +111,8 @@ console.log({
     const handleArchive = (national_id) => {
         const residents_list = [...residents]
         const selected = residents_list.find(item => item.national_id === national_id);
-        if (selected.is_archived === true) {
-            const temp_resident = { is_archived: false }
+        if (selected.is_discharged_status === true) {
+            const temp_resident = { is_discharged_status: false }
             Swal.fire({
                 title: 'Are you sure you to Un-Archive :?',
                 text: `Resident  : ${selected.first_name} ${selected.last_name}`,
@@ -136,7 +131,7 @@ console.log({
 
             });
         } else {
-            const temp_resident = { is_archived: true }
+            const temp_resident = { is_discharged_status: true }
             Swal.fire({
                 title: 'Are you sure you to Archive :?',
                 text: `Resident  : ${selected.first_name} ${selected.last_name}`,
@@ -148,10 +143,23 @@ console.log({
             }).then(function (result) {
                 if (result.value) {
                     putApi(_ => {
+
                         Swal.fire('Archived!', 'Resident has been archived.', 'success');
+
+                        const updatedResidents = residents.map(resident =>
+                            resident.national_id === selected.national_id
+                                ? {
+                                    ...resident,
+                                    is_discharged_status: temp_resident.is_discharged_status
+                                  }
+                                : resident
+                        );
+
+                        dispatch(residentActions.setResidents(updatedResidents));
+
                     }, token, `/api/resident/`, temp_resident, selected.national_id);
                 }
-                setRefresh(selected.national_id);
+
 
             });
         }
@@ -247,7 +255,7 @@ console.log({
         </ProtectedRoute>
 
         <ProtectedRoute perm="change_resident">
-          <Link to="#" onClick={() => handleDelete(row.email)}>
+          <Link to="#" onClick={() => handleArchive(row.national_id)}>
             <i className="fa fa-archive ms-text-danger mr-4" />
           </Link>
         </ProtectedRoute>
@@ -257,37 +265,44 @@ console.log({
   }
 ];
 
+    const conditionalRowStyles = [
+      {
+        when: row => row.is_discharged_status === true,
+        style: {
+          backgroundColor: '#f5f5f5',
+          color: '#888',
+          opacity: 0.8,
+          textDecoration: 'line-through',
+        },
+      },
+    ];
+
 
     useEffect(() => {
         console.log('Fetching residents...');
         getApi(response => { console.log('Home data fetched:', response.data); dispatch(homeActions.setHome(response.data)); console.log('Imba:', response.data); }, token, "/api/home");
-        getApi(response => { console.log('New data:', response.data); dispatch(residentActions.setResidents(response.data)); console.log('Residents List:', response.data); setResidentList(response.data);
-        setDischargedResidents(response.data.filter(resident => resident.is_discharged_status !==false)); }, token, "/api/resident");
+        getApi(response => {
+            console.log("Residents from API:", response.data);
+            dispatch(residentActions.setResidents(response.data));
+        }, token, `/api/resident/?t=${Date.now()}`);
     }, [dispatch, showEdit, showdelete, showleave, refresh, token]);
 
    
     console.log("Discharged:", dischargedResidents)
 
 
-    useEffect(() => {
-      if (!selected_home || !selected_home.id) {
-        setResidents(residents);
-      } else {
-        const selected_residents = residents.filter(
-          (item) =>
-            item?.home?.id?.toString() === selected_home.id.toString()
-        );
+    const residents_to_display = residents.filter(
+        resident =>
+            !selected_home?.id ||
+            resident?.home?.id?.toString() === selected_home.id.toString()
+    );
 
-        setResidents(selected_residents);
-      }
-    }, [selected_home, residents]);
-
-    console.log("New residents:", residentList)
+    console.log("Redux residents:", residents);
+    console.log("Residents to display:", residents_to_display);
 
 
-    const filteredResidents = residentList.filter((item) => item.is_discharged_status !==true);
-    console.log("Filtered Residents", filteredResidents)
-    
+
+
     return (
         <div className="ms-panel">
             
@@ -327,6 +342,7 @@ console.log({
             </div>
             <div className="ms-panel-body">
                 <div className="thead-primary datatables">
+
                     <DataTable
                         columns={columns}
                         data={residents_to_display}
@@ -334,6 +350,7 @@ console.log({
                         responsive={true}
                         striped
                         noHeader
+                        conditionalRowStyles={conditionalRowStyles}
                     />
                 </div>
             </div>

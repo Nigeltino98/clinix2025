@@ -13,6 +13,14 @@ const residentSlice = createSlice({
         setResidents(state, action) {
             state.residentList = action.payload
         },
+        addResident(state, action) {
+            console.log("Reducer addResident called");
+            console.log("Before:", state.residentList.length);
+
+            state.residentList.unshift(action.payload);
+
+            console.log("After:", state.residentList.length);
+        },
         sethandoverResident(state, action) {
             state.handoverResident = action.payload
         },
