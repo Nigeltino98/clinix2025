@@ -144,3 +144,4 @@ export const deleteInventoryItem = (handler, token, id) => {
     errorHandler(error);
   });
 };
+
