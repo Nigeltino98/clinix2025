@@ -156,6 +156,7 @@ console.log({
                         );
 
                         dispatch(residentActions.setResidents(updatedResidents));
+                        setRefresh(Date.now());
 
                     }, token, `/api/resident/`, temp_resident, selected.national_id);
                 }
@@ -283,6 +284,13 @@ console.log({
         getApi(response => { console.log('Home data fetched:', response.data); dispatch(homeActions.setHome(response.data)); console.log('Imba:', response.data); }, token, "/api/home");
         getApi(response => {
             console.log("Residents from API:", response.data);
+
+            const discharged = response.data.filter(
+                r => r.is_discharged_status === true
+            );
+
+            console.log("Discharged residents:", discharged);
+
             dispatch(residentActions.setResidents(response.data));
         }, token, `/api/resident/?t=${Date.now()}`);
     }, [dispatch, showEdit, showdelete, showleave, refresh, token]);

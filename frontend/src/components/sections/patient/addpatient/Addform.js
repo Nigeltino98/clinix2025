@@ -111,6 +111,8 @@ const Addform = () => {
         } else {
             postApi(response => {
                 console.log("CREATED RESIDENT:", response.data);
+                console.log(response);
+                console.log(response.data);
                 dispatch(
                     residentActions.addResident(response.data)
                 );
