@@ -281,7 +281,7 @@ class BodyMapViewSet(viewsets.ModelViewSet):
 
 
 class ResidentViewSet(viewsets.ModelViewSet):
-    queryset = Resident.objects.all()
+
     serializer_class = ResidentSerializer
     permission_classes = [permissions.DjangoModelPermissions]
     filter_backends = [filters.SearchFilter]
@@ -289,7 +289,7 @@ class ResidentViewSet(viewsets.ModelViewSet):
 
     # The syntax below allows for filtering based on homes
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = Resident.objects.all()
 
         home_id = self.request.query_params.get('home')
         if home_id:
@@ -323,6 +323,17 @@ class ResidentViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_409_CONFLICT)
 
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        for resident in queryset:
+            print(
+                resident.national_id,
+                resident.is_discharged_status
+            )
+
+        return super().list(request, *args, **kwargs)
 
 class PettyCashViewSet(viewsets.ModelViewSet):
     queryset = PettyCash.objects.all()
