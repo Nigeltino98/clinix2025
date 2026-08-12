@@ -10,7 +10,7 @@ import AddPlanEvaluation from "../../payment/addpayment/AddPlanEvaluation";
 import { planActions } from '../../../../store/supportPlans';
 import { planEvaluationActions} from "../../../../store/planevaluations";
 import PlanEvaluations from "../../payment/addpayment/PlanEvaluations";
-import { getApi, deleteApi, putApi } from '../../../../api/api';
+import { getApi, deleteApi, putApi, deleteSupportPlanFile } from '../../../../api/api';
 import { selectedResident, selectedStaff } from '../../../utils/expand';
 import dateToYMD from '../../../utils/dates';
 import ProtectedRoute from '../../../protected/ProtectedRoute';
@@ -29,6 +29,7 @@ const Addform = () => {
     const staff = useSelector((state) => state.staff.staffList);
     const residents = useSelector((state) => state.resident.residentList);
     const [showDelete, setShowDelete] = useState("");
+    const [openActionMenu, setOpenActionMenu] = useState(null);
     const dispatch = useDispatch();
     const [selectedPlan, setSelectedPlan] = useState(null);
     const user = useSelector((state) => state.auth.user);
@@ -163,8 +164,6 @@ const Addform = () => {
 
 
 
-
-
     const getEvaluationColor = (dateString) => {
         const today = new Date();
         const evaluationDate = new Date(dateString);
@@ -181,6 +180,10 @@ const Addform = () => {
         }
     };
 
+    const handleManageAttachments = (row) => {
+        setSelectedPlan(row);
+        setActiveModal("attachments");
+    };
     const columns = [
 
         {
@@ -224,22 +227,35 @@ const Addform = () => {
 
         //{ name: "CP Duration", selector: "cp_duration", sortable: true},
         //{ name: "Care Rating", selector: row => row.care_rating, sortable: true},
-        /*{
+        {
                 name: "Attachment",
-                cell: row =>
-                row.attachment ? (
-                    <a
-                        href={row.attachment}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        View File
-                    </a>
-                ) : (
-                    "No File"
+                cell: row => (
+
+                    row.files.length > 0 ?
+
+                        row.files.map(file => (
+
+                            <div key={file.id}>
+
+                                <a
+                                    href={file.file_url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    📎 {file.filename}
+                                </a>
+
+                            </div>
+
+                        ))
+
+                    :
+
+                    "No Attachments"
+
                 ),
             sortable: true
-        }*/
+        },
         //{ name: "By Who", selector: "by_who", sortable: true },
         //{ name: "By When", selector: "by_when", sortable: true },
         //{ name: "Goal", selector: "goal", sortable: true },
@@ -276,53 +292,93 @@ const Addform = () => {
                     {dateToYMD(row.next_assement_date)}
                 </div>, sortable: true
         },
+
         {
-            name: "", cell: row =>
-                <div>
+            name: "Actions",
+            cell: row => (
+                <div
+                    className="position-relative"
+                    onClick={(event) => event.stopPropagation()}
+                >
                     <button
-                        onClick={(event) => {
-                            event.stopPropagation();
-                            handleShowDetails(row.id);
+                        type="button"
+                        className="btn btn-sm btn-light"
+                        onClick={() => {
+                            setOpenActionMenu(
+                                openActionMenu === row.id ? null : row.id
+                            );
                         }}
                     >
-                        View Details
+                        <i className="fas fa-ellipsis-v"></i>
                     </button>
-                </div>, sortable:  true
-        },
-        {
-            name: "", cell: row =>
-                <div data-tag="allowRowEvents">
-                    <ProtectedRoute perm="change_supportplan">
-                        <Link to='#' onClick={(event) => {
-                            event.stopPropagation();
-                            handleShowEdit(row.id);
-                        }}>
-                            <i className='fas fa-pencil-alt ms-text-info  mr-4'/>
-                        </Link>
-                    </ProtectedRoute>
-                    <ProtectedRoute perm="delete_supportplan">
-                        <Link to='#' onClick={(event) => {
-                           event.stopPropagation();
-                            handleDelete(row.id);
-                        }}>
 
-                        </Link>
-                    </ProtectedRoute>
-                    <ProtectedRoute perm="view_planevaluation">
-                        <Link to='#'  onClick={(event) => {
-                            event.stopPropagation();
-                            handleShowAddPlanEvaluation(event, row);
-                        }}>
-                            <i className='fas fa-plus ms-text-info mr-4' />
-                        </Link>
-                    </ProtectedRoute>
+                    {openActionMenu === row.id && (
+                        <div
+                            className="position-absolute bg-white border rounded shadow"
+                            style={{
+                                right: 0,
+                                top: "100%",
+                                zIndex: 1000,
+                                minWidth: "180px"
+                            }}
+                        >
 
-                    <ProtectedRoute perm="delete_supportplan">
-                        <Link to='#' onClick={ () => handleArchive(row.id)}>
-                            <i className='fas fa-archive ms-text-info mr-4' />
-                        </Link>
-                    </ProtectedRoute>
-                </div>, sortable: true
+                            <button
+                                type="button"
+                                className="dropdown-item"
+                                onClick={() => {
+                                    setOpenActionMenu(null);
+                                    handleShowDetails(row.id);
+                                }}
+                            >
+                                <i className="fas fa-eye me-2"></i>
+                                View Details
+                            </button>
+
+                            <button
+                                type="button"
+                                className="dropdown-item"
+                                onClick={() => {
+                                    setOpenActionMenu(null);
+                                    handleShowEdit(row.id);
+                                }}
+                            >
+                                <i className="fas fa-pencil-alt me-2"></i>
+                                Edit
+                            </button>
+
+                            <button
+                                type="button"
+                                className="dropdown-item"
+                                onClick={() => {
+                                    setOpenActionMenu(null);
+                                    // We will connect this next
+                                    handleManageAttachments(row);
+                                }}
+                            >
+                                <i className="fas fa-paperclip me-2"></i>
+                                Manage Attachments
+                            </button>
+
+                            <button
+                                type="button"
+                                className="dropdown-item text-danger"
+                                onClick={() => {
+                                    setOpenActionMenu(null);
+                                    handleDelete(row.id);
+                                }}
+                            >
+                                <i className="fas fa-trash me-2"></i>
+                                Delete
+                            </button>
+
+                        </div>
+                    )}
+                </div>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true
         },
     ];
 
@@ -425,7 +481,63 @@ const Addform = () => {
             }
         });
     };
+    const handleDeleteAttachment = (file) => {
 
+        Swal.fire({
+            title: 'Delete attachment?',
+            text: `Are you sure you want to delete "${file.filename}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+
+                deleteSupportPlanFile(
+                    () => {
+
+                        // Remove the deleted file from the selected plan
+                        setSelectedPlan(prevPlan => ({
+                            ...prevPlan,
+                            files: prevPlan.files.filter(
+                                item => item.id !== file.id
+                            )
+                        }));
+
+                        // Also update the plan in Redux
+                        const updatedPlans = plans.map(plan => {
+
+                            if (plan.id === selectedPlan?.id) {
+
+                                return {
+                                    ...plan,
+                                    files: plan.files.filter(
+                                        item => item.id !== file.id
+                                    )
+                                };
+
+                            }
+
+                            return plan;
+                        });
+
+                        dispatch(planActions.setPlans(updatedPlans));
+
+                        Swal.fire(
+                            'Deleted!',
+                            'Attachment has been deleted.',
+                            'success'
+                        );
+                    },
+                    token,
+                    file.id
+                );
+            }
+        });
+    };
     // Filter plans based on 'deletion' status
     const filteredPlans = display_plans
       .filter(item => item.is_deleted !== true)
@@ -631,11 +743,43 @@ const Addform = () => {
                             <td>Last Evaluated</td>
                             <td>{dateToYMD(selectedPlan.last_evaluated_date)}</td>
                         </tr>
+                        <tr>
+                            <td>Attachments</td>
+
+                            <td>
+
+                                {selectedPlan?.files?.length  > 0?
+
+                                    selectedPlan.files.map(file => (
+
+                                        <div key={file.id}>
+
+                                            <a
+                                                href={file.file_url}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                            >
+                                                📄 {file.filename}
+                                            </a>
+
+                                        </div>
+
+                                    ))
+
+                                :
+
+                                "No Attachments"}
+
+                            </td>
+
+                        </tr>
                     </tbody>
                 </table>
             </Modal.Body>
         </Modal>
+
     );
+
 };
 
     return (
@@ -722,6 +866,74 @@ const Addform = () => {
             />
         </Modal>
 
+        <Modal
+            show={activeModal === "attachments"}
+            onHide={() => setActiveModal(null)}
+            size="lg"
+            centered
+        >
+            <Modal.Header closeButton>
+                <Modal.Title>
+                    Manage Attachments
+                </Modal.Title>
+            </Modal.Header>
+
+            <Modal.Body>
+
+                {selectedPlan?.files?.length > 0 ? (
+
+                    selectedPlan.files.map(file => (
+
+                        <div
+                            key={file.id}
+                            className="d-flex justify-content-between align-items-center border-bottom py-3"
+                        >
+
+                            <div>
+                                <a
+                                    href={file.file_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <i className="fas fa-paperclip me-2"></i>
+                                    {file.filename}
+                                </a>
+                            </div>
+
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-danger"
+                                onClick={() => handleDeleteAttachment(file)}
+                            >
+                                <i className="fas fa-trash"></i>
+                            </button>
+
+                        </div>
+
+                    ))
+
+                ) : (
+
+                    <div className="text-center py-4">
+                        <i className="fas fa-paperclip fa-2x mb-2"></i>
+                        <p>No attachments found for this Support Plan.</p>
+                    </div>
+
+                )}
+
+            </Modal.Body>
+
+            <Modal.Footer>
+                <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setActiveModal(null)}
+                >
+                    Close
+                </button>
+            </Modal.Footer>
+
+        </Modal>
         </div>
     );
 };

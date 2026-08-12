@@ -145,3 +145,10 @@ export const deleteInventoryItem = (handler, token, id) => {
   });
 };
 
+export const deleteSupportPlanFile = (handler, token, fileId) => {
+    deleteApi(
+        handler,
+        token,
+        `/api/plan-files/${fileId}/`
+    );
+};

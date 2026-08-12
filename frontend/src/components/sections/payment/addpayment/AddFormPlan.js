@@ -34,7 +34,7 @@ const Addform = () => {
         last_evaluated_date: '',
         next_assement_date: '',
         //evaluations: '',
-        attachment: "",
+        files: [],
         resident: '',
 
 
@@ -60,6 +60,9 @@ const Addform = () => {
             if (value !== null && value !== undefined) {
                 formData.append(key, value);
             }
+        });
+        state.files.forEach(file => {
+            formData.append("files", file);
         });
             postApi(_ => {
                 toastsuccess("Support Plan added successfully");
@@ -176,10 +179,10 @@ const Addform = () => {
                     next_assement_date: event.target.value
                 })
                 break;
-            case 'attachment':
+            case 'files':
                 setState({
                     ...state,
-                    attachment: event.target.files[0]
+                    files: [...event.target.files]
                 });
                 break;
             /*case 'evaluations':
@@ -450,13 +453,14 @@ const Addform = () => {
                             </Form.Group>
                             <Form.Group as={Col} md="6" className="mb-3" controlId="validationCustomFile">
                                 <Form.Label>Attach File (optional)</Form.Label>
-                                {errors.attachment && errors.attachment.map(err => (
+                                {errors.files && errors.files.map(err => (
                                     <p key={err} className='ms-text-danger'>{err}</p>
                                 ))}
                                 <InputGroup>
                                     <Form.Control
-                                        name="attachment"
+                                        name="files"
                                         type="file"
+                                        multiple
                                         onChange={handleChange}
                                     />
                                 </InputGroup>

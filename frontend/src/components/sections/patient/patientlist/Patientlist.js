@@ -131,7 +131,10 @@ console.log({
 
             });
         } else {
-            const temp_resident = { is_discharged_status: true }
+            const temp_resident = {
+                is_discharged_status: true,
+                date_of_discharge: new Date().toISOString().split('T')[0]
+            };
             Swal.fire({
                 title: 'Are you sure you to Archive :?',
                 text: `Resident  : ${selected.first_name} ${selected.last_name}`,
@@ -301,8 +304,11 @@ console.log({
 
     const residents_to_display = residents.filter(
         resident =>
-            !selected_home?.id ||
-            resident?.home?.id?.toString() === selected_home.id.toString()
+            resident.is_discharged_status !== true &&
+            (
+                !selected_home?.id ||
+                resident?.home?.id?.toString() === selected_home.id.toString()
+            )
     );
 
     console.log("Redux residents:", residents);

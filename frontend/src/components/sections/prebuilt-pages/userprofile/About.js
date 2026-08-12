@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux'
 import { Modal } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import DataTable from 'react-data-table-component';
+//import DataTable from 'react-data-table-component';
 import { familyAction } from '../../../../store/family'
 import Swal from 'sweetalert2'
 import { deleteApi, getApi } from '../../../../api/api'
@@ -11,6 +11,8 @@ import FamilyAdd from '../../../modals/FamilyAdd';
 import AddNextofKeen from '../../../modals/AddNextofKeen';
 import { selectedHome } from '../../../utils/expand'
 import ProtectedRoute from '../../../protected/ProtectedRoute'
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const About = () => {
     const dispatch = useDispatch()
@@ -89,6 +91,79 @@ const About = () => {
 
     ];
 
+    const downloadResidentPDF = () => {
+        if (!selected_resident || !selected_resident.national_id) {
+            Swal.fire(
+                'No Resident Selected',
+                'Please select a resident before downloading the PDF.',
+                'warning'
+            );
+            return;
+        }
+
+        const doc = new jsPDF();
+
+        // Report title
+        doc.setFontSize(18);
+        doc.text('Resident Basic Information', 14, 20);
+
+        // Resident name
+        doc.setFontSize(11);
+        doc.text(
+            `Resident: ${selected_resident.first_name || ''} ${selected_resident.last_name || ''}`,
+            14,
+            30
+        );
+
+        // Date generated
+        doc.setFontSize(9);
+        doc.text(
+            `Generated: ${new Date().toLocaleDateString()}`,
+            14,
+            37
+        );
+
+        // Information table
+        const tableData = information.map((item) => [
+            item.title,
+            item.text || ''
+        ]);
+
+        autoTable(doc, {
+            startY: 45,
+            head: [['Information', 'Details']],
+            body: tableData,
+
+            styles: {
+                fontSize: 9,
+                cellPadding: 4,
+            },
+
+            headStyles: {
+                fontSize: 10,
+                fontStyle: 'bold',
+            },
+
+            columnStyles: {
+                0: {
+                    cellWidth: 55,
+                    fontStyle: 'bold',
+                },
+                1: {
+                    cellWidth: 125,
+                },
+            },
+        });
+
+        // File name
+        const fileName =
+            `${selected_resident.first_name || 'Resident'}_` +
+            `${selected_resident.last_name || ''}_` +
+            `Information.pdf`;
+
+        doc.save(fileName);
+    };
+
     const columns = [
      {
       name: "Name",
@@ -164,7 +239,22 @@ const About = () => {
             <div className="col-xl-12 col-md-12">
                 <div className="ms-panel ms-panel-fh">
                     <div className="ms-panel-body">
-                        <h2 className="section-title">Resident Basic Information</h2>
+
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                            <h2 className="section-title mb-0">
+                                Resident Basic Information
+                            </h2>
+
+                            <button
+                                type="button"
+                                className="btn btn-primary"
+                                onClick={downloadResidentPDF}
+                            >
+                                <i className="fa fa-file-pdf-o mr-2"></i>
+                                Download PDF
+                            </button>
+                        </div>
+
                         <table className="table ms-profile-information">
                             <tbody>
                                 {information.map((item, i) => (
