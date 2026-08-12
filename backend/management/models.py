@@ -474,6 +474,7 @@ class Resident(models.Model):
     NHS_number = models.CharField(max_length=255, null=True, blank=True)
 
     created_on = models.DateTimeField(_("Created On"), auto_now_add=True)
+    date_of_discharge = models.DateField(blank=True, null=True)
     room = models.CharField(max_length=3, blank=True, null=True)
     home = models.ForeignKey(
         "Home", on_delete=models.CASCADE, null=True
@@ -667,7 +668,7 @@ class SupportPlan(models.Model):
     staff = models.CharField(max_length=100, blank=True, null=True)
     is_deleted = models.BooleanField(default=False)
     deletion_reason = models.TextField(null=True, blank=True, default="Not deleted")
-    attachment = models.FileField(upload_to='support_plans', null=True, blank=True, default=None)
+
 
     def __str__(self):
         return self.title
@@ -677,6 +678,12 @@ class SupportPlanFile(models.Model):
     plan = models.ForeignKey(SupportPlan, related_name='files', on_delete=models.CASCADE)
     file = models.FileField(upload_to='support_plans/')
     uploaded_date = models.DateTimeField(auto_now_add=True)
+    uploaded_by = models.ForeignKey("User", on_delete=models.SET_NULL, null=True, blank=True)
+    class Meta:
+        ordering = ["-uploaded_date"]
+
+    def __str__(self):
+        return self.file.name
 
 
 class PlanEvaluation(models.Model):

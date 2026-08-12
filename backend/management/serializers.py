@@ -1,3 +1,4 @@
+import os
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from django.utils.translation import gettext_lazy as _
@@ -180,17 +181,27 @@ class RotaSerializer(serializers.ModelSerializer):
 
 class SupportPlanFileSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
+    filename = serializers.SerializerMethodField()
 
     class Meta:
         model = SupportPlanFile
-        fields = "__all__"
+        fields = (
+            "id",
+            "file",
+            "file_url",
+            "filename",
+            "uploaded_date",
+        )
 
     def get_file_url(self, obj):
         request = self.context.get('request')
-        if request is not None:
+        if request:
             return request.build_absolute_uri(obj.file.url)
-        return obj.file.url  # fallback relative URL
 
+        return obj.file.url
+
+    def get_filename(self, obj):
+        return os.path.basename(obj.file.name)
 
 class SupportPlanSerializer(serializers.ModelSerializer):
     name_first = serializers.CharField(source='created_by.first_name', read_only=True)
@@ -199,7 +210,10 @@ class SupportPlanSerializer(serializers.ModelSerializer):
     lastname = serializers.CharField(source='resident.last_name', read_only=True)
     next_assement_date = serializers.DateTimeField()
 
-    attachment = SupportPlanFileSerializer(source='supportplanfile_set', many=True, read_only=True)
+    files = SupportPlanFileSerializer(
+        many=True,
+        read_only=True
+    )
     created_by = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:

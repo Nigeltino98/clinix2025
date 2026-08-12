@@ -74,6 +74,7 @@ router.register(r"confidential-info", views.ConfidentialRecordViewSet, "Confiden
 router.register(r'support-plan/(?P<support_plan_id>\d+)/evaluations', views.PlanEvaluationViewSet, basename='evaluations')
 router.register(r'evaluations', views.PlanEvaluationViewSet, basename='PlanEvaluations')
 router.register(r'risk-options', views.AtRiskOptionViewSet, basename='AtRiskOptions')
+router.register(r'plan-files', views.SupportPlanFileViewSet, "SupportPlanFile")
 
 
 urlpatterns = [
@@ -120,6 +121,7 @@ urlpatterns = [
     path("repair-record", views.RepairRecordViewSet.as_view({"get": "list", "post": "create"}), name="repair-record"),
     path("evaluations/", views.PlanEvaluationViewSet.as_view({"get": "list", "post": "create"}), name="evaluations"),
     path("risk-options/", views.AtRiskOptionViewSet.as_view({"get": "list", "post": ""}), name="risk-options"),
+    path("plan-files/", views.SupportPlanFileViewSet.as_view({"get": "list"}), name="plan-files"),
 
 
 

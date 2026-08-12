@@ -494,9 +494,14 @@ class SupportPlanViewSet(viewsets.ModelViewSet):
         instance = serializer.save(created_by=self.request.user)
 
         # Save uploaded files
-        files = self.request.FILES.getlist('files')
-        for f in files:
-            SupportPlanFile.objects.create(support_plan=instance, file=f)
+        uploaded_files = self.request.FILES.getlist("files")
+
+        for file in uploaded_files:
+            SupportPlanFile.objects.create(
+                plan=instance,
+                file=file,
+                uploaded_by=self.request.user
+            )
 
         # Save user history
         UserHistory.objects.create(
@@ -520,6 +525,19 @@ class SupportPlanViewSet(viewsets.ModelViewSet):
             details=f'Updated Support Plan for: {instance.resident_id}',
         )
 
+
+class SupportPlanFileViewSet(viewsets.ModelViewSet):
+    queryset = SupportPlanFile.objects.all()
+    serializer_class = SupportPlanFileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_destroy(self, instance):
+        # Delete the physical file from storage
+        if instance.file:
+            instance.file.delete(save=False)
+
+        # Delete the database record
+        instance.delete()
 
 class PlanEvaluationViewSet(viewsets.ModelViewSet):
     queryset = PlanEvaluation.objects.all()
