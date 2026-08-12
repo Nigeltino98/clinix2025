@@ -12,16 +12,19 @@ RUN apt-get update --fix-missing && \
     # Add any additional system dependencies here, if needed \
     && rm -rf /var/lib/apt/lists/*
 
+# Set up directory structure
+
+WORKDIR /usr/src/app
+COPY . /usr/src/app
+
 # Install Python dependencies
+
 COPY ./requirements.txt /requirements.txt
 RUN pip install --no-cache-dir -r /requirements.txt
 
 # Collect static files
-RUN python manage.py collectstatic --noinput
-# Set up directory structure
-WORKDIR /usr/src/app
-COPY . /usr/src/app
 
+RUN python manage.py collectstatic --noinput
 # Run migrations and start the Django development server
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "backend.wsgi:application"]
 
