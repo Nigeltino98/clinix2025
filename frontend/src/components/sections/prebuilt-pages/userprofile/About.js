@@ -9,7 +9,7 @@ import { deleteApi, getApi } from '../../../../api/api'
 import FamilyEdit from '../../../modals/FamilyEdit';
 import FamilyAdd from '../../../modals/FamilyAdd';
 import AddNextofKeen from '../../../modals/AddNextofKeen';
-import { selectedHome } from '../../../utils/expand'
+//import { selectedHome } from '../../../utils/expand'
 import ProtectedRoute from '../../../protected/ProtectedRoute'
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -25,6 +25,23 @@ const About = () => {
     const [showAdd, setshowAdd] = useState(false)
     const [showKin, setshowKin] = useState(false)
     const [showdelete, setshowdelete] = useState("")
+    const homeList = homes || [];
+
+    const homeName = (() => {
+        if (!selected_resident?.home) return '';
+
+        if (typeof selected_resident.home === 'object') {
+            return selected_resident.home.name || '';
+        }
+
+        const home = (homes || []).find(
+            (item) =>
+                item.id?.toString() ===
+                selected_resident.home?.toString()
+        );
+
+        return home?.name || '';
+    })();
 
     const handleShowEdit = (national_id) => {
         const family_list = [...family]
@@ -71,28 +88,66 @@ const About = () => {
         });
     }
     const information = [
-        { title: 'Full Name', text: `${selected_resident.first_name} ${selected_resident.last_name} ` },
-        { title: 'Date Of Birth', text: `${selected_resident.date_of_birth}` },
-        { title: 'Date of admission', text: `${selected_resident.date_of_admission}` },
-        { title: 'National insurance', text: `${selected_resident.national_id}` },
-        { title: 'NHS Number', text: `${selected_resident.NHS_number}` },
-        { title: 'Clinical Diagnosis', text: `${selected_resident.clinical_diagnosis}` },
-        { title: 'Medical Condition', text: `${selected_resident.medical_condition}` },
-        { title: 'Risk', text: `${selected_resident.risk}` },
-        { title: 'Ethnicity', text: `${selected_resident.ethnic_origin}` },
-        { title: 'Marital Status', text: `${selected_resident.marital_status}` },
-        //{ title: 'Phone Number', text: `${selected_resident.phone}` },
-        //{ title: 'Email Address', text: `${selected_resident.email}` },
-        { title: 'Gender', text: `${selected_resident.gender}` },
-        //{ title: 'Room', text: `${selected_resident.room}` },
-        { title: 'Address', text: `${selected_resident.address}` },
-        { title: 'Home', text: `${selectedHome(selected_resident.home, homes)}` },
-        { title: 'Next of Kin', text: `${selected_resident.next_of_kin}` },
-
+        {
+            title: 'Full Name',
+            text: `${selected_resident?.first_name || ''} ${selected_resident?.last_name || ''}`.trim()
+        },
+        {
+            title: 'Date Of Birth',
+            text: selected_resident?.date_of_birth || ''
+        },
+        {
+            title: 'Date of admission',
+            text: selected_resident?.date_of_admission || ''
+        },
+        {
+            title: 'National insurance',
+            text: selected_resident?.national_id || ''
+        },
+        {
+            title: 'NHS Number',
+            text: selected_resident?.NHS_number || ''
+        },
+        {
+            title: 'Clinical Diagnosis',
+            text: selected_resident?.clinical_diagnosis || ''
+        },
+        {
+            title: 'Medical Condition',
+            text: selected_resident?.medical_condition || ''
+        },
+        {
+            title: 'Risk',
+            text: selected_resident?.risk || ''
+        },
+        {
+            title: 'Ethnicity',
+            text: selected_resident?.ethnic_origin || ''
+        },
+        {
+            title: 'Marital Status',
+            text: selected_resident?.marital_status || ''
+        },
+        {
+            title: 'Gender',
+            text: selected_resident?.gender || ''
+        },
+        {
+            title: 'Address',
+            text: selected_resident?.address || ''
+        },
+        {
+            title: 'Home',
+            text: homeName
+        },
+        {
+            title: 'Next of Kin',
+            text: selected_resident?.next_of_kin || ''
+        }
     ];
 
     const downloadResidentPDF = () => {
-        if (!selected_resident || !selected_resident.national_id) {
+        if (!selected_resident?.national_id) {
             Swal.fire(
                 'No Resident Selected',
                 'Please select a resident before downloading the PDF.',
@@ -101,67 +156,93 @@ const About = () => {
             return;
         }
 
-        const doc = new jsPDF();
+        try {
+            const doc = new jsPDF();
 
-        // Report title
-        doc.setFontSize(18);
-        doc.text('Resident Basic Information', 14, 20);
+            doc.setFontSize(18);
+            doc.text('Resident Basic Information', 14, 20);
 
-        // Resident name
-        doc.setFontSize(11);
-        doc.text(
-            `Resident: ${selected_resident.first_name || ''} ${selected_resident.last_name || ''}`,
-            14,
-            30
-        );
+            doc.setFontSize(11);
 
-        // Date generated
-        doc.setFontSize(9);
-        doc.text(
-            `Generated: ${new Date().toLocaleDateString()}`,
-            14,
-            37
-        );
+            const residentName =
+                `${selected_resident?.first_name || ''} ${
+                    selected_resident?.last_name || ''
+                }`.trim();
 
-        // Information table
-        const tableData = information.map((item) => [
-            item.title,
-            item.text || ''
-        ]);
+            doc.text(
+                `Resident: ${residentName}`,
+                14,
+                30
+            );
 
-        autoTable(doc, {
-            startY: 45,
-            head: [['Information', 'Details']],
-            body: tableData,
+            doc.setFontSize(9);
 
-            styles: {
-                fontSize: 9,
-                cellPadding: 4,
-            },
+            doc.text(
+                `Generated: ${new Date().toLocaleDateString()}`,
+                14,
+                37
+            );
 
-            headStyles: {
-                fontSize: 10,
-                fontStyle: 'bold',
-            },
+            const tableData = information.map((item) => [
+                String(item.title || ''),
+                String(item.text || '')
+            ]);
 
-            columnStyles: {
-                0: {
-                    cellWidth: 55,
-                    fontStyle: 'bold',
+            autoTable(doc, {
+                startY: 45,
+
+                head: [
+                    ['Information', 'Details']
+                ],
+
+                body: tableData,
+
+                styles: {
+                    fontSize: 9,
+                    cellPadding: 4,
+                    overflow: 'linebreak'
                 },
-                1: {
-                    cellWidth: 125,
+
+                headStyles: {
+                    fontSize: 10,
+                    fontStyle: 'bold'
                 },
-            },
-        });
 
-        // File name
-        const fileName =
-            `${selected_resident.first_name || 'Resident'}_` +
-            `${selected_resident.last_name || ''}_` +
-            `Information.pdf`;
+                columnStyles: {
+                    0: {
+                        cellWidth: 55,
+                        fontStyle: 'bold'
+                    },
+                    1: {
+                        cellWidth: 125
+                    }
+                }
+            });
 
-        doc.save(fileName);
+            const safeFirstName =
+                selected_resident?.first_name || 'Resident';
+
+            const safeLastName =
+                selected_resident?.last_name || '';
+
+            const fileName =
+                `${safeFirstName}_${safeLastName}_Information.pdf`
+                    .replace(/\s+/g, '_');
+
+            doc.save(fileName);
+
+        } catch (error) {
+            console.error(
+                'Error generating resident PDF:',
+                error
+            );
+
+            Swal.fire(
+                'PDF Error',
+                'Unable to generate the resident PDF. Please try again.',
+                'error'
+            );
+        }
     };
 
     const columns = [

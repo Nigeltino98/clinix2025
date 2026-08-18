@@ -25,7 +25,7 @@ const Overview = () => {
                 <>
                     <div className="ms-profile-overview">
                         <div className="ms-profile-cover">
-                            <img className="ms-profile-img" src={selected_resident.profile_pic} alt={selected_resident.email} />
+
                             <div className="ms-profile-user-info">
                                 <h1 className="ms-profile-username">{selected_resident.first_name} {selected_resident.last_name}</h1>
                                 {/* <h2 className="ms-profile-role">Professional UX Designer</h2> */}

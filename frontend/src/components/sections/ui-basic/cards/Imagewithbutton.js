@@ -76,9 +76,7 @@ const Imagewithbutton = (props) => {
                                 <div className="col-lg-6 col-md-6 col-sm-6">
                                     <Link to="#" onClick={() => props.handleOpen(item.id)} className="btn btn-primary btn-block">Record</Link>
                                 </div>
-                                <div className="col-lg-6 col-md-6 col-sm-6">
-                                    <Link to={item.view_path} onClick={() => { handleCare(item.id) }} className="btn btn-outline-primary btn-block">View</Link>
-                                </div>
+     
                             </div>
                         </div>
                     </div>
