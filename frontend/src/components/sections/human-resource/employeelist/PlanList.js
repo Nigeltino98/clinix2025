@@ -359,7 +359,19 @@ const Addform = () => {
                                 <i className="fas fa-paperclip me-2"></i>
                                 Manage Attachments
                             </button>
-
+                            <ProtectedRoute perm="view_planevaluation">
+                                <button
+                                    type="button"
+                                    className="dropdown-item"
+                                    onClick={() => {
+                                        setOpenActionMenu(null);
+                                        handleShowAddPlanEvaluation(row);
+                                    }}
+                                >
+                                    <i className="fas fa-plus me-2"></i>
+                                    Add Evaluation
+                                </button>
+                            </ProtectedRoute>
                             <button
                                 type="button"
                                 className="dropdown-item text-danger"
@@ -407,9 +419,9 @@ const Addform = () => {
         setActiveModal("details");
     };
 
-    const handleShowAddPlanEvaluation = (event, row) => {
-        event.stopPropagation();  // Prevent triggering row actions
+    const handleShowAddPlanEvaluation = (row) => {
         const selected_plan = plans.find(item => item.id === row.id);
+
         setSelectedPlan(selected_plan);
         setActiveModal("addEvaluation");
     };
