@@ -1,0 +1,14 @@
+node_modules
+build
+clinix
+.git
+.gitignore
+.dockerignore
+Dockerfile
+Dockerfile.dev
+.env
+.env.*
+npm-debug.log
+yarn-error.log
+.cache
+coverage
