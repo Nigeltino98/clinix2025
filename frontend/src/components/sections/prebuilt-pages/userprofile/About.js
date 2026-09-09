@@ -306,9 +306,17 @@ const About = () => {
     ];
 
     useEffect(() => {
-        const selected = family.filter(item => item.resident === selected_resident.national_id);
-        setFamily(selected)
-    }, [selected_resident, family])
+        if (!selected_resident?.national_id) {
+            setFamily([]);
+            return;
+        }
+
+        const selected = family.filter(
+            item => item.resident === selected_resident.national_id
+        );
+
+        setFamily(selected);
+    }, [selected_resident, family]);
 
 
     useEffect(() => {

@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom';
 import { Modal } from 'react-bootstrap';
 import PatientEdit from '../../../modals/PatientEdit';
-import ProtectedRoute from '../../../protected/ProtectedRoute'
+//import ProtectedRoute from '../../../protected/ProtectedRoute'
 
 const Overview = () => {
     const selected_resident = useSelector((selected_resident) => selected_resident.resident.selectedResident)
@@ -31,11 +31,13 @@ const Overview = () => {
                                 {/* <h2 className="ms-profile-role">Professional UX Designer</h2> */}
                             </div>
                             <div className="ms-profile-user-buttons">
-                                <ProtectedRoute perm="chnage_resident">
-                                    <Link to="#" onClick={() => handleShowEdit()} className="btn btn-light">
-                                        <i className="material-icons">create</i> Edit Profile
-                                    </Link>
-                                </ProtectedRoute>
+                                <Link
+                                    to="#"
+                                    onClick={handleShowEdit}
+                                    className="btn btn-light"
+                                >
+                                    <i className="material-icons">create</i> Edit Profile
+                                </Link>
                             </div>
                         </div>
                         <Nav variant="tabs" className="ms-profile-navigation nav nav-tabs tabs-bordered">
@@ -49,16 +51,16 @@ const Overview = () => {
                             <Nav.Item>
                                 <Nav.Link eventKey="tab3">Leave History</Nav.Link>
                             </Nav.Item>
-                            <ProtectedRoute perm="view_attachments">
+
                                 <Nav.Item>
                                     <Nav.Link as={Link} to="/attacthment">Attatchments</Nav.Link>
                                 </Nav.Item>
-                            </ProtectedRoute>
-                            <ProtectedRoute perm="view_finance">
+
+
                                 <Nav.Item>
                                     <Nav.Link as={Link} to="/payment">Finance</Nav.Link>
                                 </Nav.Item>
-                            </ProtectedRoute>
+
                             <Nav.Item>
                                 {/* <Nav.Link eventKey="tab6">Archive History</Nav.Link> */}
                             </Nav.Item>
