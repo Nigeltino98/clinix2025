@@ -1,0 +1,13 @@
+.git
+.gitignore
+node_modules
+build
+clinix
+clinix2025
+.env
+.env.*
+*.log
+__pycache__
+*.pyc
+*.pyo
+mediafiles

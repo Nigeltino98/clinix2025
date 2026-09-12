@@ -125,15 +125,23 @@ class ReminderViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_409_CONFLICT)
 
 
+
 class StaffViewSet(viewsets.ModelViewSet):
-    queryset = get_user_model().objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.DjangoModelPermissions]
 
     def get_queryset(self):
-        queryset = get_user_model().objects.all()
+        queryset = (
+            get_user_model()
+            .objects
+            .all()
+            .prefetch_related(
+                "groups",
+                "user_permissions",
+            )
+        )
 
-        gender = self.request.query_params.get('gender')
+        gender = self.request.query_params.get("gender")
 
         if gender:
             queryset = queryset.filter(gender=gender)
@@ -1427,15 +1435,13 @@ class InventoryItemDeleteViewSet(viewsets.ModelViewSet):
 
 
 class UserHistoryViewSet(viewsets.ModelViewSet):
-    queryset = UserHistory.objects.all()
     serializer_class = UserHistorySerializer
     permission_classes = [permissions.DjangoModelPermissions]
 
-    def get(self, request):
-        user = request.user  # Get the currently logged-in user
-        user_history = UserHistory.objects.filter(user=user)  # Fetch user history records
-        serializer = UserHistorySerializer(user_history, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_queryset(self):
+        return UserHistory.objects.filter(
+            user=self.request.user
+        ).order_by("-id")
 
 
 class DeleteNonSuperusersViewSet(viewsets.ViewSet):
