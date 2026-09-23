@@ -492,10 +492,28 @@ class SupportPlanViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     parser_classes = [JSONParser, MultiPartParser, FormParser]
 
+    def get_queryset(self):
+        queryset = SupportPlan.objects.select_related(
+            'resident',
+            'created_by',
+        ).prefetch_related(
+            'files'
+        )
 
+        if self.action == 'list':
+            archived = self.request.query_params.get('archived')
+
+            if archived == 'true':
+                queryset = queryset.filter(is_deleted=True)
+            else:
+                queryset = queryset.filter(is_deleted=False)
+
+        return queryset
     def get_serializer(self, *args, **kwargs):
         kwargs['context'] = self.get_serializer_context()
         return super().get_serializer(*args, **kwargs)
+
+
 
     def perform_create(self, serializer):
         print("DEBUG request.user:", self.request.user, self.request.user.is_authenticated)
@@ -519,12 +537,27 @@ class SupportPlanViewSet(viewsets.ModelViewSet):
         )
 
     def perform_update(self, serializer):
-        instance = serializer.save()
+        is_being_archived = (
+                serializer.validated_data.get("is_deleted") is True
+                and not serializer.instance.is_deleted
+        )
+
+        if is_being_archived:
+            instance = serializer.save(
+                archived_by=self.request.user
+            )
+        else:
+            instance = serializer.save()
 
         # Save uploaded files
         files = self.request.FILES.getlist('files')
+
         for f in files:
-            SupportPlanFile.objects.create(support_plan=instance, file=f)
+            SupportPlanFile.objects.create(
+                plan=instance,
+                file=f,
+                uploaded_by=self.request.user
+            )
 
         # Save user history
         UserHistory.objects.create(

@@ -209,6 +209,7 @@ class SupportPlanSerializer(serializers.ModelSerializer):
     firstname = serializers.CharField(source='resident.first_name', read_only=True)
     lastname = serializers.CharField(source='resident.last_name', read_only=True)
     next_assement_date = serializers.DateTimeField()
+    archived_by_name = serializers.SerializerMethodField()
 
     files = SupportPlanFileSerializer(
         many=True,
@@ -220,12 +221,24 @@ class SupportPlanSerializer(serializers.ModelSerializer):
         model = SupportPlan
         fields = "__all__"
 
+    keyworker_name = serializers.SerializerMethodField()
+
+    def get_keyworker_name(self, obj):
+        if obj.keyworker:
+            return f"{obj.keyworker.first_name} {obj.keyworker.last_name}".strip()
+        return ""
+
     def get_created_by(self, obj):
         return obj.created_by.username if obj.created_by else None
 
     def get_resident_name(self, obj):
         return f"{obj.resident.first_name} {obj.resident.last_name}"
 
+    def get_archived_by_name(self, obj):
+        if obj.archived_by:
+            return f"{obj.archived_by.first_name} {obj.archived_by.last_name}".strip()
+
+        return ""
 
 class PlanEvaluationSerializer(serializers.ModelSerializer):
     name_first = serializers.CharField(source='staff.first_name', read_only=True)

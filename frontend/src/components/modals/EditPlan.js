@@ -15,6 +15,7 @@ const EditQuestion = (props) => {
     const [formData, setFormData] = useState(props.plan || {});
     const [validated, setValidated] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
+    const staff = useSelector((state) => state.staff.staffList) || [];
 
     console.log("Received plan in EditQuestion:", props.plan);
     const API_URL = process.env.NODE_ENV === 'production'
@@ -105,14 +106,30 @@ const EditQuestion = (props) => {
       <Row className="g-3">
         <Col md={6}>
           <Form.Label>Title</Form.Label>
-          <Form.Control
+          <Form.Select
             name="title"
-            as="textarea"
-            rows={3}
             value={formData.title || ''}
             onChange={handleChange}
             required
-          />
+
+          >
+            <option value='Category' >========================</option>
+            <option value='HousingTenancy' >Housing/Tenancy</option>
+            <option value='FinanceMoneyBenefitManagement' >Finance/Money/Benefit Management</option>
+            <option value='RentArrears' >Rent Arrears</option>
+            <option value='Education/Training' >Education/Training</option>
+            <option value='Employment' >Employment</option>
+            <option value='PhysicalHealth' >Physical Health</option>
+            <option value='MentalHealthSubstanceUse' >Mental Health/Substance Use</option>
+            <option value='LeisureSocialNetwork' >Leisure/Social network</option>
+            <option value='MovingOn' >Moving On</option>
+            <option value='Furtherconcerns/needs' >Further concerns/needs</option>
+            <option value='ServicesProvidedByHousingOrEstateManagementService' >Services provided by Housing or Estate Management </option>
+            <option value='ServicesProvidedBySupportWorker' >Services provided by support worker</option>
+            <option value='SupportWorkersViewsofIssuesNeedsorActionsIfDifferentFromServiceUsrs' >Support worker's views of issues, needs or actions if different from service users</option>
+            <option value='SummaryOfSupportActionsToBeProvidedBySupportTeam' >Summary of support actions to be provided by support team</option>
+            <option value='Other' >Other</option>
+          </Form.Select>
         </Col>
 
         <Col md={6}>
@@ -123,20 +140,22 @@ const EditQuestion = (props) => {
             onChange={handleChange}
             required
           >
-            <option value="">-- Select --</option>
-            <option value="HousingTenancy">Housing/Tenancy</option>
-            <option value="Risk">Risk</option>
-            <option value="FinanceMoneyBenefitManagement">Finance/Money</option>
-            <option value="Education">Education</option>
-            <option value="Employment">Employment</option>
-            <option value="MentalHealthSubstanceUse">Mental Health</option>
-              <option value='EthnicCulturalReligiousNeeds'>Ethnic/Cultural/Religious Needs</option>
-              <option value='LeisureSocialNetwork'>Leisure/Social Network</option>
-              <option value='MovingOn'>Moving On</option>
-              <option value='FurtherConcernsNeeds'>Further Concerns/Needs</option>
-              <option value='ServicesprovidedbyHousingorEselected_planManagementService'>Services provided by Housing or Estate Management</option>
-              <option value='ServicesprovidedbySupportWorker'>Services provided by Support Worker</option>
-              <option value='SupportWorkersViewsofIssuesNeedsorActions'>Support Worker’s Views</option>
+            <option value='Category' >========================</option>
+            <option value='HousingTenancy' >Housing/Tenancy</option>
+            <option value='FinanceMoneyBenefitManagement' >Finance/Money/Benefit Management</option>
+            <option value='RentArrears' >Rent Arrears</option>
+            <option value='Education/Training' >Education/Training</option>
+            <option value='Employment' >Employment</option>
+            <option value='PhysicalHealth' >Physical Health</option>
+            <option value='MentalHealthSubstanceUse' >Mental Health/Substance Use</option>
+            <option value='LeisureSocialNetwork' >Leisure/Social network</option>
+            <option value='MovingOn' >Moving On</option>
+            <option value='Furtherconcerns/needs' >Further concerns/needs</option>
+            <option value='ServicesProvidedByHousingOrEstateManagementService' >Services provided by Housing or Estate Management </option>
+            <option value='ServicesProvidedBySupportWorker' >Services provided by support worker</option>
+            <option value='SupportWorkersViewsofIssuesNeedsorActionsIfDifferentFromServiceUsrs' >Support worker's views of issues, needs or actions if different from service users</option>
+            <option value='SummaryOfSupportActionsToBeProvidedBySupportTeam' >Summary of support actions to be provided by support team</option>
+            <option value='Other' >Other</option>
           </Form.Select>
         </Col>
 
@@ -148,6 +167,25 @@ const EditQuestion = (props) => {
         <Col md={6}>
           <Form.Label>Action Plan</Form.Label>
           <Form.Control name="action_plan" as="textarea" value={formData.action_plan || ''} onChange={handleChange} />
+        </Col>
+
+        <Col md={6}>
+            <Form.Label>Keyworker</Form.Label>
+
+            <Form.Select
+                name="keyworker"
+                value={formData.keyworker || ''}
+                onChange={handleChange}
+                required
+            >
+                <option value="">-- Select Keyworker --</option>
+
+                {staff.map((member) => (
+                    <option key={member.id} value={member.id}>
+                        {member.first_name} {member.last_name}
+                    </option>
+                ))}
+            </Form.Select>
         </Col>
 
         <Col md={6}>

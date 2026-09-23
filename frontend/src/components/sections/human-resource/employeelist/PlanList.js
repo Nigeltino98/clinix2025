@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
 import DataTableExtensions from 'react-data-table-component-extensions';
@@ -24,7 +25,9 @@ const Addform = () => {
     const [display_plans, setDisplayPlans] = useState([]);
     const token = useSelector((state) => state.auth.token).token;
     const plans = useSelector((state) => state.plan.planList);
-    const evaluations = useSelector((state) => state.evaluation.evaluations);
+    const evaluations = useSelector(
+    (state) => state.planEvaluation.evaluationList);
+    console.log("Redux evaluation state:", evaluations);
     const selected_resident = useSelector((state) => state.resident.selectedResident);
     const staff = useSelector((state) => state.staff.staffList);
     const residents = useSelector((state) => state.resident.residentList);
@@ -33,9 +36,13 @@ const Addform = () => {
     const dispatch = useDispatch();
     const [selectedPlan, setSelectedPlan] = useState(null);
     const user = useSelector((state) => state.auth.user);
-    const [selectedEvaluations, setSelectedEvaluations] = useState([]);
     const [statusFilter, setStatusFilter] = useState("ALL");
     const BASE_BACKEND_URL = "http://127.0.0.1:8000";
+    const [actionMenuDirection, setActionMenuDirection] = useState("down");
+    const [actionMenuPosition, setActionMenuPosition] = useState({
+        top: 0,
+        left: 0
+    });
 
     //const contentRef = useRef();
 
@@ -154,6 +161,7 @@ const Addform = () => {
     drawLabelText("Action Plan", selectedPlan.action_plan, false);
     drawLabelText("Goal", selectedPlan.goal, false);
     drawLabelText("Achievements", selectedPlan.achievements, false);
+    drawLabelText("Key-worker", selectedPlan.keyworker_name || "Not assigned");
 
 
     drawFooter();
@@ -266,12 +274,18 @@ const Addform = () => {
                     {selectedResident(row.resident, residents)}
                 </div>, sortable: true
         },
+
+
         {
-            name: "Staff", cell: row =>
+            name: "Keyworker",
+            cell: row => (
                 <div>
-                    {selectedStaff(row.created_by, staff)}
-                </div>, sortable: true
+                    {row.keyworker_name || "Not assigned"}
+                </div>
+            ),
+            sortable: true
         },
+        //{name: "Staff", cell: row =><div>{selectedStaff(row.created_by, staff)}</div>, sortable: true},
         {
             name: "Created on", cell: row =>
                 <div>
@@ -294,100 +308,166 @@ const Addform = () => {
         },
 
         {
+
             name: "Actions",
-            cell: row => (
-                <div
-                    className="position-relative"
-                    onClick={(event) => event.stopPropagation()}
-                >
-                    <button
-                        type="button"
-                        className="btn btn-sm btn-light"
-                        onClick={() => {
-                            setOpenActionMenu(
-                                openActionMenu === row.id ? null : row.id
-                            );
-                        }}
-                    >
-                        <i className="fas fa-ellipsis-v"></i>
-                    </button>
+            cell: row => {
+                const isOpen = openActionMenu === row.id;
 
-                    {openActionMenu === row.id && (
+                const handleActionButtonClick = (event) => {
+                    event.stopPropagation();
+
+                    // If this menu is already open, close it
+                    if (isOpen) {
+                        setOpenActionMenu(null);
+                        return;
+                    }
+
+                    const buttonRect =
+                        event.currentTarget.getBoundingClientRect();
+
+                    const menuWidth = 180;
+                    const menuHeight = 220;
+                    const spacing = 5;
+
+                    const spaceBelow =
+                        window.innerHeight - buttonRect.bottom;
+
+                    const spaceAbove =
+                        buttonRect.top;
+
+                    const shouldOpenUp =
+                        spaceBelow < menuHeight &&
+                        spaceAbove > spaceBelow;
+
+                    setActionMenuDirection(
+                        shouldOpenUp ? "up" : "down"
+                    );
+
+                    let top;
+
+                    if (shouldOpenUp) {
+                        top = buttonRect.top - menuHeight - spacing;
+                    } else {
+                        top = buttonRect.bottom + spacing;
+                    }
+
+                    // Keep the menu inside the viewport horizontally
+                    let left = buttonRect.right - menuWidth;
+
+                    if (left < 5) {
+                        left = 5;
+                    }
+
+                    if (left + menuWidth > window.innerWidth - 5) {
+                        left = window.innerWidth - menuWidth - 5;
+                    }
+
+                    setActionMenuPosition({
+                        top,
+                        left
+                    });
+
+                    setOpenActionMenu(row.id);
+                };
+
+                return (
+                    <>
                         <div
-                            className="position-absolute bg-white border rounded shadow"
-                            style={{
-                                right: 0,
-                                top: "100%",
-                                zIndex: 1000,
-                                minWidth: "180px"
-                            }}
+                            className="position-relative"
+                            onClick={(event) => event.stopPropagation()}
                         >
-
                             <button
                                 type="button"
-                                className="dropdown-item"
-                                onClick={() => {
-                                    setOpenActionMenu(null);
-                                    handleShowDetails(row.id);
-                                }}
+                                className="btn btn-sm btn-light"
+                                onClick={handleActionButtonClick}
                             >
-                                <i className="fas fa-eye me-2"></i>
-                                View Details
+                                <i className="fas fa-ellipsis-v"></i>
                             </button>
+                        </div>
 
-                            <button
-                                type="button"
-                                className="dropdown-item"
-                                onClick={() => {
-                                    setOpenActionMenu(null);
-                                    handleShowEdit(row.id);
-                                }}
-                            >
-                                <i className="fas fa-pencil-alt me-2"></i>
-                                Edit
-                            </button>
-
-                            <button
-                                type="button"
-                                className="dropdown-item"
-                                onClick={() => {
-                                    setOpenActionMenu(null);
-                                    // We will connect this next
-                                    handleManageAttachments(row);
-                                }}
-                            >
-                                <i className="fas fa-paperclip me-2"></i>
-                                Manage Attachments
-                            </button>
-                            <ProtectedRoute perm="view_planevaluation">
-                                <button
-                                    type="button"
-                                    className="dropdown-item"
-                                    onClick={() => {
-                                        setOpenActionMenu(null);
-                                        handleShowAddPlanEvaluation(row);
+                        {isOpen &&
+                            createPortal(
+                                <div
+                                    className="bg-white border rounded shadow"
+                                    onClick={(event) =>
+                                        event.stopPropagation()
+                                    }
+                                    style={{
+                                        position: "fixed",
+                                        top: `${actionMenuPosition.top}px`,
+                                        left: `${actionMenuPosition.left}px`,
+                                        zIndex: 999999,
+                                        minWidth: "180px",
+                                        width: "180px"
                                     }}
                                 >
-                                    <i className="fas fa-plus me-2"></i>
-                                    Add Evaluation
-                                </button>
-                            </ProtectedRoute>
-                            <button
-                                type="button"
-                                className="dropdown-item text-danger"
-                                onClick={() => {
-                                    setOpenActionMenu(null);
-                                    handleDelete(row.id);
-                                }}
-                            >
-                                <i className="fas fa-trash me-2"></i>
-                                Delete
-                            </button>
+                                    <button
+                                        type="button"
+                                        className="dropdown-item"
+                                        onClick={() => {
+                                            setOpenActionMenu(null);
+                                            handleShowDetails(row.id);
+                                        }}
+                                    >
+                                        <i className="fas fa-eye me-2"></i>
+                                        View Details
+                                    </button>
 
-                        </div>
-                    )}
-                </div>
-            ),
+                                    <button
+                                        type="button"
+                                        className="dropdown-item"
+                                        onClick={() => {
+                                            setOpenActionMenu(null);
+                                            handleShowEdit(row.id);
+                                        }}
+                                    >
+                                        <i className="fas fa-pencil-alt me-2"></i>
+                                        Edit
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className="dropdown-item"
+                                        onClick={() => {
+                                            setOpenActionMenu(null);
+                                            handleManageAttachments(row);
+                                        }}
+                                    >
+                                        <i className="fas fa-paperclip me-2"></i>
+                                        Manage Attachments
+                                    </button>
+
+                                    <ProtectedRoute perm="view_planevaluation">
+                                        <button
+                                            type="button"
+                                            className="dropdown-item"
+                                            onClick={() => {
+                                                setOpenActionMenu(null);
+                                                handleShowAddPlanEvaluation(row);
+                                            }}
+                                        >
+                                            <i className="fas fa-plus me-2"></i>
+                                            Add Evaluation
+                                        </button>
+                                    </ProtectedRoute>
+
+                                    <button
+                                        type="button"
+                                        className="dropdown-item text-danger"
+                                        onClick={() => {
+                                            setOpenActionMenu(null);
+                                            handleArchive(row.id);
+                                        }}
+                                    >
+                                        <i className="fas fa-trash me-2"></i>
+                                        Delete
+                                    </button>
+                                </div>,
+                                document.body
+                            )}
+                    </>
+                );
+            },
             ignoreRowClick: true,
             allowOverflow: true,
             button: true
@@ -575,11 +655,6 @@ const Addform = () => {
             dispatch(planActions.setPlans(response.data));
         }, token, "/api/plan");
 
-        if (selectedPlan) {
-            getApi(response => {
-                setSelectedEvaluations(response.data);
-            }, token, `/api/support-plan/${selectedPlan.id}/evaluations`);
-        }
 
     }, [dispatch, token, showDelete]);
 
@@ -593,7 +668,19 @@ const Addform = () => {
     }, [dispatch, token, plans, selected_resident]);
 
 
+    useEffect(() => {
+        const handleScroll = () => {
+            if (openActionMenu !== null) {
+                setOpenActionMenu(null);
+            }
+        };
 
+        window.addEventListener("scroll", handleScroll, true);
+
+        return () => {
+            window.removeEventListener("scroll", handleScroll, true);
+        };
+    }, [openActionMenu]);
 
 
 
@@ -733,7 +820,7 @@ const Addform = () => {
                         </tr>
                         <tr>
                             <td>Key-worker</td>
-                            <td>{`${selectedPlan.name_first} ${selectedPlan.name_last}`}</td>
+                            <td>{selectedPlan.keyworker_name || "Not assigned"}</td>
                         </tr>
                         <tr>
                             <td>By When</td>
@@ -869,14 +956,12 @@ const Addform = () => {
                 <AddPlanEvaluation plan={selectedPlan} handleClose={() => setActiveModal(null)}/>
             </Modal.Body>
         </Modal>
-        <Modal show={activeModal === "viewEvaluations"} onHide={() => setActiveModal(null)}>
             <PlanEvaluations
                 show={activeModal === "viewEvaluations"}
-                handleClose={() => setActiveModal(false)}
+                handleClose={() => setActiveModal(null)}
                 plan={selectedPlan}
-                evaluations={selectedEvaluations}
+                evaluations={evaluations}
             />
-        </Modal>
 
         <Modal
             show={activeModal === "attachments"}

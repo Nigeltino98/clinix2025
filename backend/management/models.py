@@ -1,3 +1,5 @@
+from random import choices
+
 from django.conf import settings  # new
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -71,25 +73,26 @@ DAILY_CARE_OPTIONS = (("bath", "bath"),)
 CATEGORY_TYPE = (
     ("HousingTenancy", "Housing/Tenancy"),
     ("FinanceMoneyBenefitManagement", "Finance/Money/Benefit Management"),
-    ("RentArrearsServiceUsers", "Rent Arrears - Service Users"),
+    ("RentArrears", "Rent Arrears"),
     ("Education", "Education"),
     ("Training", "Training"),
     ("Employment", "Employment"),
-    ("MentalHealthSubstanceUse", "Mental Health/Substance Use"),
-    ("EthnicCulturalReligiousNeeds", "Ethnic/Cultural/Religious Needs -"),
-    ("LeisureSocialNetwork", "LeisureSocialNetwork"),
-    ("MovingOn", "Moving On"),
-    ("FurtherConcernsNeeds", "Further Concerns/Needs -"),
-    (
-        "ServicesProvidedByHousingOrEstateManagementService",
-        "Services provided by Housing or Estate Management Service",
-    ),
-    ("ServicesProvidedBySupportWorker", "Services provided by Support Worker"),
-    (
-        "SupportWorkersViewsofIssuesNeedsorActions",
-        "Support Worker's Views of Issues, Needs or Actions",
-    ),
     ("PhysicalHealth", "Physical Health "),
+    ("MentalHealthSubstanceUse", "Mental Health/Substance Use"),
+    ("LeisureSocialNetwork", "LeisureSocial Network"),
+    ("MovingOn", "Moving On"),
+    ("FurtherConcernsNeeds", "Further Concerns/Needs"),
+    (
+        "ServicesProvidedByHousingOrEstateManagement",
+        "Services provided by Housing or Estate Management",
+    ),
+    ("ServicesProvidedBySupportWorker", "Services provided by support worker"),
+    (
+        "SupportWorker'sViewsofIssuesNeedsorActionsIfDifferentFromServiceUsers",
+        "Support worker's views of issues, needs or Actions if different from service users",
+    ),
+    ("Other", "Other"),
+
 )
 
 REPEAT_CHOICES = (
@@ -638,7 +641,7 @@ class Rota(models.Model):
 
 
 class SupportPlan(models.Model):
-    title = models.CharField(max_length=100, null=True, blank=True)
+    title = models.CharField(choices=CATEGORY_TYPE, max_length=100,default="None" )
     created_on = models.DateTimeField(_("Created On"), auto_now_add=True)
     care_rating = models.CharField(_("Care Rating"), max_length=40, null=True, blank=True)
     approved_by = models.TextField(null=True, blank=True)
@@ -666,8 +669,22 @@ class SupportPlan(models.Model):
     category = models.CharField(choices=CATEGORY_TYPE, max_length=100)
     last_evaluated_date = models.DateTimeField(auto_now=True, blank=True, null=True)
     staff = models.CharField(max_length=100, blank=True, null=True)
-    is_deleted = models.BooleanField(default=False)
+    keyworker = models.ForeignKey(
+        "User",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="keyworker_support_plans",
+    )
+    is_deleted = models.BooleanField(default=False, db_index=True)
     deletion_reason = models.TextField(null=True, blank=True, default="Not deleted")
+    archived_by = models.ForeignKey(
+        "User",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="archived_support_plans",
+    )
 
 
     def __str__(self):

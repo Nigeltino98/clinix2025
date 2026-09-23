@@ -285,7 +285,19 @@ const SuggestionEdit = (props) => {
                                 </InputGroup>
                             </Form.Group>
                         </Row>
-                        <Button type="submit" className="mt-4 d-inline w-20">Save</Button>
+                        <div className="d-flex justify-content-end gap-2 mt-4">
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                onClick={props.handleClose}
+                            >
+                                Close
+                            </Button>
+
+                            <Button type="submit">
+                                Save
+                            </Button>
+                        </div>
                     </Form>
                 </div>
             </div>
