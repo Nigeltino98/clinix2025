@@ -116,28 +116,53 @@ const SuggestionList = () => {
   const filteredResidents = selectedHome
     ? suggestions
         .map((s) => s.resident)
-        .filter((r) => r.home === selectedHome)
-        .filter((value, index, self) => self.indexOf(value) === index) // unique
-    : suggestions.map((s) => s.resident);
+        .filter(Boolean)
+        .filter(
+          (resident) =>
+            resident.home?.id?.toString() === selectedHome.toString()
+        )
+        .filter(
+          (resident, index, self) =>
+            index ===
+            self.findIndex(
+              (r) => r.national_id === resident.national_id
+            )
+        )
+    : [];
 
   // Apply the filters to suggestions for the table
   const filteredSuggestions = suggestions
     .filter((item) => {
-      // 🔹 HOME FILTER ONLY
+      // HOUSE FILTER
       if (selectedHome) {
-        return item.resident?.home?.id?.toString() === selectedHome.toString();
+        return (
+          item.resident?.home?.id?.toString() ===
+          selectedHome.toString()
+        );
       }
+
       return true;
     })
     .filter((item) => {
-      // 🔹 STATUS FILTER
+      // RESIDENT FILTER
+      if (selectedResident) {
+        return (
+          item.resident?.national_id?.toString() ===
+          selectedResident.toString()
+        );
+      }
+
+      return true;
+    })
+    .filter((item) => {
+      // REVIEW STATUS FILTER
       const status = getReviewStatus(item.next_assement_date);
 
       if (filterStatus === "PAST") return status === "PAST";
       if (filterStatus === "TODAY") return status === "TODAY";
       if (filterStatus === "UPCOMING") return status === "UPCOMING";
 
-      return true; // ALL
+      return true;
     });
 
   const handleRowClick = (row) => setSelectedSuggestion(row.id);
@@ -203,36 +228,104 @@ const SuggestionList = () => {
   );
   const SelectedSuggestionModal = () => {
     if (!selectedSuggestionObject) return null;
+
     const onClose = () => {
       setSelectedSuggestion(null);
       setShowEdit(false);
     };
 
     return (
-      <Modal show={true} className="ms-modal-dialog-width ms-modal-content-width" onHide={onClose} centered>
-        <Modal.Header className="ms-modal-header-radius-0">
+      <Modal
+        show={true}
+        onHide={onClose}
+        size="lg"
+        centered
+        scrollable
+      >
+        <Modal.Header
+          className="ms-modal-header-radius-0"
+          closeButton
+        >
           <div>
-            <h1 style={{ fontSize: '24px', marginBottom: '0' }}>Seacole Healthcare</h1>
-            <h4 className="modal-title text-white">Selected Accident</h4>
-            <p>Date recorded: {selectedSuggestionObject.created_on}</p>
+            <h1 style={{ fontSize: '24px', marginBottom: '0' }}>
+              Seacole Healthcare
+            </h1>
+
+            <h4 className="modal-title text-white">
+              Selected Accident / Incident
+            </h4>
+
+            <p className="mb-0">
+              Date recorded: {selectedSuggestionObject.created_on}
+            </p>
           </div>
-          <button type="button" className="close text-red w-20 mr-2" onClick={onClose}>x</button>
+
           <PrintButton />
         </Modal.Header>
-        <Modal.Body style={{ padding: '20px', fontSize: '16px', lineHeight: '1.5' }}>
-          <h5>Resident:{" "}
-            {selectedSuggestionObject.resident?.first_name}{" "}
 
+        <Modal.Body
+          style={{
+            padding: '20px',
+            fontSize: '16px',
+            lineHeight: '1.5'
+          }}
+        >
+          <h5>
+            Resident:{' '}
+            {selectedSuggestionObject.resident?.first_name}{' '}
+            {selectedSuggestionObject.resident?.last_name}
           </h5>
-          <p>Report type: {selectedSuggestionObject.report_type}</p>
-          <p>Date of Occurrence: {selectedSuggestionObject.date_occured}</p>
-          <p>Next Assessment: {selectedSuggestionObject.next_assement_date}</p>
-          <p>Follow Up: {selectedSuggestionObject.follow_up_notes}</p>
-          <p>Preventative Action: {selectedSuggestionObject.future_preventative_action}</p>
-          <p>Action Taken: {selectedSuggestionObject.action_taken}</p>
-          <p>Incident: {selectedSuggestionObject.incident_details}</p>
-          <p>Status: {selectedSuggestionObject.status}</p>
+
+          <p>
+            <strong>Report type:</strong>{' '}
+            {selectedSuggestionObject.report_type}
+          </p>
+
+          <p>
+            <strong>Date of Occurrence:</strong>{' '}
+            {selectedSuggestionObject.date_occured}
+          </p>
+
+          <p>
+            <strong>Next Assessment:</strong>{' '}
+            {selectedSuggestionObject.next_assement_date}
+          </p>
+
+          <p>
+            <strong>Follow Up:</strong>{' '}
+            {selectedSuggestionObject.follow_up_notes}
+          </p>
+
+          <p>
+            <strong>Preventative Action:</strong>{' '}
+            {selectedSuggestionObject.future_preventative_action}
+          </p>
+
+          <p>
+            <strong>Action Taken:</strong>{' '}
+            {selectedSuggestionObject.action_taken}
+          </p>
+
+          <p>
+            <strong>Incident:</strong>{' '}
+            {selectedSuggestionObject.incident_details}
+          </p>
+
+          <p>
+            <strong>Status:</strong>{' '}
+            {selectedSuggestionObject.status}
+          </p>
         </Modal.Body>
+
+        <Modal.Footer>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={onClose}
+          >
+            Close
+          </button>
+        </Modal.Footer>
       </Modal>
     );
   };
@@ -255,6 +348,7 @@ const SuggestionList = () => {
               value={selectedHome}
               onChange={(e) => {
                 setSelectedHome(e.target.value);
+                setSelectedResident("");
 
               }}
             >
@@ -325,11 +419,19 @@ const SuggestionList = () => {
         </div>
         <SelectedSuggestionModal />
       </div>
-      <Modal show={showEdit} className="ms-modal-dialog-width ms-modal-content-width" onHide={handleCloseEdit} centered>
-        <Modal.Header className="ms-modal-header-radius-0">
-          <h4 className="modal-title text-white">Edit Suggestion</h4>
-          <button type="button" className="close text-white" onClick={handleCloseEdit}>x</button>
+      <Modal
+        show={showEdit}
+        onHide={handleCloseEdit}
+        size="lg"
+        centered
+        scrollable
+      >
+        <Modal.Header className="ms-modal-header-radius-0" closeButton>
+          <Modal.Title className="text-white">
+            Edit Accident / Incident
+          </Modal.Title>
         </Modal.Header>
+
         <Modal.Body className="p-0 text-left">
           <SuggestionEdit handleClose={handleCloseEdit} />
         </Modal.Body>

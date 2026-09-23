@@ -12,7 +12,10 @@ const EvaluationsModal = ({ show, handleClose, plan, evaluations }) => {
 
 
 
-    const evaluationsForPlan = evaluations.filter(evaluation => evaluation.support_plan === plan.id);
+    const evaluationsForPlan = evaluations.filter(
+        evaluation =>
+            String(evaluation.support_plan) === String(plan.id)
+    );
 
     return (
         <Modal show={show} onHide={handleClose}  centered
@@ -34,13 +37,16 @@ const EvaluationsModal = ({ show, handleClose, plan, evaluations }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {evaluations.length > 0 ? (
+                        {evaluationsForPlan.length > 0 ? (
                             evaluationsForPlan.map((evaluation) => (
                                 <tr key={evaluation.id}>
-
-                                    <td>{evaluation.name_first} {evaluation.name_last}</td>
+                                    <td>
+                                        {evaluation.name_first} {evaluation.name_last}
+                                    </td>
                                     <td>{evaluation.text}</td>
-                                    <td>{new Date(evaluation.date).toLocaleDateString('en-CA')}</td>
+                                    <td>
+                                        {new Date(evaluation.date).toLocaleDateString('en-CA')}
+                                    </td>
                                 </tr>
                             ))
                         ) : (

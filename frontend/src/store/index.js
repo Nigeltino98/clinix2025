@@ -23,6 +23,7 @@ import assessmentReducer from './assessment'
 import questionReducer from './question'
 import notificationReducer from './notification'
 import evaluationReducer from './evaluation'
+import planEvaluationReducer from './planevaluations'
 import answerReducer from './answer'
 import choiceReducer from './choice'
 import afternoonRoutineReducer from './afternoonRoutine'
@@ -64,6 +65,7 @@ const reducers = combineReducers({
     question: questionReducer,
     notification: notificationReducer,
     evaluation: evaluationReducer,
+    planEvaluation: planEvaluationReducer,
     answer: answerReducer,
     choice: choiceReducer,
     afternoonRoutine: afternoonRoutineReducer,

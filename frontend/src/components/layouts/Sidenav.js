@@ -145,6 +145,11 @@ const Sidenav = () => {
           <ProtectedRoute perm="view_supportplan">
             <MenuSection title="Support Plan" id="support">
               <Link to="/supportplan">Support Plans</Link>
+              <Link
+                  to="/archived-support-plans"
+                >
+                  Archived Support Plans
+              </Link>
               <Link to="/supportplan/add-supportplan">
                 Start Assessment
               </Link>

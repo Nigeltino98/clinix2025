@@ -27,50 +27,71 @@ const planEvaluationSlice = createSlice({
 });
 
 export const fetchPlanEvaluations = (token, planId) => async (dispatch) => {
-    try {
-        console.log("Fetching evaluations for plan ID:", planId);
-        const response = await getApi(token, `/api/support-plan/${planId}/evaluations`);
+    console.log("Fetching evaluations for plan ID:", planId);
 
-        console.log("API Response:", response);
-
-        if (response && response.data) {
-            dispatch({
-                type: 'FETCH_PLAN_EVALUATIONS_SUCCESS',
-                payload: response.data,
-            });
-        } else {
-            console.error("Unexpected response format:", response);
-            // Handle unexpected response format
-        }
-    } catch (error) {
-        console.error("Error fetching plan evaluations:", error);
-        // Handle error properly
-    }
-};
-
-
-export const addPlanEvaluationRequest = (token, planId, evaluation, onSuccess, onError) => {
-  return async (dispatch) => {
-    try {
-      const response = await postApi(
+    getApi(
         (response) => {
-          dispatch(planEvaluationActions.addEvaluation(response.data));
-          onSuccess(response);
+            console.log("API Response:", response);
+
+            if (response && response.data) {
+                console.log("Evaluation data being dispatched:", response.data);
+                dispatch(
+                    planEvaluationActions.setEvaluationList(response.data)
+                );
+            } else {
+                console.error("Unexpected response format:", response);
+            }
         },
         token,
-        `/api/support-plan/${planId}/evaluations/`,
-        evaluation,
-        (errors_list) => {
-          dispatch(planEvaluationActions.setErrors(errors_list));
-          onError(errors_list);
+        `/api/support-plan/${planId}/evaluations/`
+    );
+};
+
+export const addPlanEvaluationRequest = (
+    token,
+    planId,
+    evaluation,
+    onSuccess,
+    onError
+) => {
+    return async (dispatch) => {
+        try {
+            postApi(
+                (response) => {
+                    dispatch(
+                        planEvaluationActions.addEvaluation(response.data)
+                    );
+
+                    onSuccess(response);
+                },
+                token,
+                `/api/support-plan/${planId}/evaluations/`,
+                evaluation,
+                (errors_list) => {
+                    dispatch(
+                        planEvaluationActions.setErrors(errors_list)
+                    );
+
+                    onError(errors_list);
+                }
+            );
+        } catch (error) {
+            console.error('Error adding plan evaluation:', error);
+
+            dispatch(
+                planEvaluationActions.setErrors({
+                    postError: 'Failed to add evaluation'
+                })
+            );
+
+            onError([
+                {
+                    message:
+                        'Failed to add plan evaluation. Please try again.'
+                }
+            ]);
         }
-      );
-    } catch (error) {
-      console.error('Error adding plan evaluation:', error);
-      dispatch(planEvaluationActions.setErrors({ postError: 'Failed to add evaluation' }));
-      onError([{ message: 'Failed to add plan evaluation. Please try again.' }]);
-    }
-  };
+    };
 };
 
 export const planEvaluationActions = { ...planEvaluationSlice.actions, fetchPlanEvaluations, addPlanEvaluationRequest };

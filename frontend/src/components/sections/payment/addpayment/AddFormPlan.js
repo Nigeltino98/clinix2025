@@ -36,6 +36,7 @@ const Addform = () => {
         //evaluations: '',
         files: [],
         resident: '',
+        keyworker:'',
 
 
 
@@ -185,6 +186,13 @@ const Addform = () => {
                     files: [...event.target.files]
                 });
                 break;
+
+            case 'keyworker':
+                setState({
+                    ...state,
+                    keyworker: event.target.value
+                })
+                break;
             /*case 'evaluations':
                 setState({
                     ...state,
@@ -207,7 +215,6 @@ const Addform = () => {
         setState(prevState => ({
             ...prevState,
             created_by: user.id,
-            staff: user.id,
             resident: JSON.stringify(selected_resident) !== '{}' ? selected_resident.national_id : ''
         }))
     }, [user, selected_resident])
@@ -242,10 +249,29 @@ const Addform = () => {
                                         onChange={handleChange}
                                         required
                                         value={state.title}
-                                        type="text"
-                                        as="textarea"
-                                        rows={3} placeholder="Title"
-                                    />
+                                        as="select"
+                                        placeholder="Title"
+
+                                    >
+                                        <option value='Category' >========================</option>
+                                        <option value='HousingTenancy' >Housing/Tenancy</option>
+                                        <option value='FinanceMoneyBenefitManagement' >Finance/Money/Benefit Management</option>
+                                        <option value='RentArrears' >Rent Arrears</option>
+                                        <option value='Education/Training' >Education/Training</option>
+                                        <option value='Employment' >Employment</option>
+                                        <option value='PhysicalHealth' >Physical Health</option>
+                                        <option value='MentalHealthSubstanceUse' >Mental Health/Substance Use</option>
+                                        <option value='LeisureSocialNetwork' >Leisure/Social network</option>
+                                        <option value='MovingOn' >Moving On</option>
+                                        <option value='Furtherconcerns/needs' >Further concerns/needs</option>
+                                        <option value='ServicesProvidedByHousingOrEstateManagementService' >Services provided by Housing or Estate Management </option>
+                                        <option value='ServicesProvidedBySupportWorker' >Services provided by support worker</option>
+                                        <option value='SupportWorkersViewsofIssuesNeedsorActionsIfDifferentFromServiceUsers' >Support worker's views of issues, needs or actions if different from service users</option>
+                                        <option value='SummaryOfSupportActionsToBeProvidedBySupportTeam' >Summary of support actions to be provided by support team</option>
+                                        <option value='Other' >Other</option>
+
+
+                                    </Form.Control>
                                 </InputGroup>
                             </Form.Group>
                             <Form.Group as={Col} md="6" className="mb-3" controlId="validationCustom02">
@@ -258,23 +284,26 @@ const Addform = () => {
                                         onChange={handleChange}
                                         value={state.category}
                                         as="select"
+                                        placeholder="Category"
                                     >
+                                        <option value='Category' >========================</option>
                                         <option value='HousingTenancy' >Housing/Tenancy</option>
-                                        {/* <option value='Risk' >Risk</option> */}
                                         <option value='FinanceMoneyBenefitManagement' >Finance/Money/Benefit Management</option>
-                                        <option value='RentArrearsServiceUsers' >Rent Arrears - Service Users</option>
-                                        <option value='Education' >Education</option>
-                                        <option value='Training' >Training</option>
+                                        <option value='RentArrears' >Rent Arrears</option>
+                                        <option value='Education/Training' >Education/Training</option>
                                         <option value='Employment' >Employment</option>
-                                        <option value='MentalHealthSubstanceUse' >Mental Health/Substance Use</option>
-                                        <option value='EthnicCulturalReligiousNeeds' >Ethnic/Cultural/Religious Needs -</option>
-                                        <option value='LeisureSocialNetwork' >LeisureSocialNetwork</option>
-                                        <option value='MovingOn' >Moving On</option>
-                                        <option value='FurtherConcernsNeeds' >Further Concerns/Needs -</option>
-                                        <option value='ServicesProvidedByHousingOrEstateManagementService' >Services provided by Housing or Estate Management Service</option>
-                                        <option value='ServicesProvidedBySupportWorker' >Services provided by Support Worker</option>
-                                        <option value='SupportWorkersViewsofIssuesNeedsorActions' >Support Worker's Views of Issues, Needs or Actions</option>
                                         <option value='PhysicalHealth' >Physical Health</option>
+                                        <option value='MentalHealthSubstanceUse' >Mental Health/Substance Use</option>
+                                        <option value='LeisureSocialNetwork' >Leisure/Social network</option>
+                                        <option value='MovingOn' >Moving On</option>
+                                        <option value='Furtherconcerns/needs' >Further concerns/needs</option>
+                                        <option value='ServicesProvidedByHousingOrEstateManagementService' >Services provided by Housing or Estate Management </option>
+                                        <option value='ServicesProvidedBySupportWorker' >Services provided by support worker</option>
+                                        <option value='SupportWorkersViewsofIssuesNeedsorActionsIfDifferentFromServiceUsrs' >Support worker's views of issues, needs or actions if different from service users</option>
+                                        <option value='SummaryOfSupportActionsToBeProvidedBySupportTeam' >Summary of support actions to be provided by support team</option>
+                                        <option value='Other' >Other</option>
+
+
                                     </Form.Control>
                                 </InputGroup>
                             </Form.Group>
@@ -293,19 +322,22 @@ const Addform = () => {
                                 </InputGroup>
                             </Form.Group>
                             <Form.Group as={Col} md="6" className="mb-3" controlId="validationCustom03">
-                            <Form.Label>
-                                Keyworker
-                            </Form.Label>
-                                {errors.staff && errors.staff.map(err => { return (<p key={err} className='ms-text-danger'>{err}</p>) })}
+                            <Form.Label>Keyworker</Form.Label>
+                                {errors.keyworker && errors.keyworker.map(err => { return (<p key={err} className='ms-text-danger'>{err}</p>) })}
                                 <InputGroup>
-                                    <Form.Control as="select" onChange={handleChange}
-                                                  name="staff">
-                                        {staff_list.map(staff =>  (
-                                            <option key={staff.id}  value={staff.id}>{staff.first_name}  {staff.last_name}
+                                    <Form.Control
+                                        as="select"
+                                        name="keyworker"
+                                        value={state.keyworker || ''}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="">-- Select Keyworker --</option>
 
+                                        {staff_list.map(staff => (
+                                            <option key={staff.id} value={staff.id}>
+                                                {staff.first_name} {staff.last_name}
                                             </option>
                                         ))}
-
                                     </Form.Control>
                                 </InputGroup>
 

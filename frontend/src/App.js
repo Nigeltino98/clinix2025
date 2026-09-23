@@ -24,6 +24,7 @@ import { noteActions } from './store/note';
 import WelcomePage from './components/pages/WelcomePage';
 
 import Preloader from "./components/layouts/Preloader";
+import ArchivedSupportPlans from "./components/sections/human-resource/employeelist/ArchivedSupportPlan";
 
 const Home = React.lazy(() => import("./components/pages/Home"));
 const Rota = React.lazy(() => import("./components/pages/rota/Rota"));
@@ -50,6 +51,7 @@ const Addevaluation = React.lazy(() => import("./components/pages/human-resource
 const PossibleAnswer = React.lazy(() => import("./components/pages/human-resource/PossibleAnswer"));
 const Employeelist = React.lazy(() => import("./components/pages/human-resource/Employeelist"));
 const SupportPlan = React.lazy(() => import("./components/pages/human-resource/SupportPlan"));
+const ArchivedSupportPlan = React.lazy(() => import("./components/sections/human-resource/employeelist/ArchivedSupportPlan"));
 const RiskList = React.lazy(() => import("./components/pages/human-resource/Risk"));
 const Notifications = React.lazy(() => import("./components/pages/human-resource/Notifications"));
 const AddRisk = React.lazy(() => import("./components/pages/payment/AddRisk"));
@@ -175,6 +177,7 @@ const App = () => {
             <Route exact path="/supportplan" element={<SupportPlan />} />
             <Route path="/supportplan/add-supportplan" element={<AddPlan />} />
             <Route path="/supportplan/evaluations" element={<AddPlanEvaluation />} />
+            <Route path="/archived-support-plans" element={<ArchivedSupportPlans />} />
 
             {/* Risk Assessment */}
             <Route path="/riskassessment/detail" element={<Employeelist />} />
